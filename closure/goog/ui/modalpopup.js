@@ -471,11 +471,13 @@ goog.ui.ModalPopup.prototype.show_ = function() {
   this.focus();
   this.visible_ = true;
 
-  if (this.popupShowTransition_ && this.bgShowTransition_) {
+  if (this.popupShowTransition_) {
     goog.events.listenOnce(
         /** @type {!goog.events.EventTarget} */ (this.popupShowTransition_),
         goog.fx.Transition.EventType.END, this.onShow, false, this);
-    this.bgShowTransition_.play();
+    if (this.bgShowTransition_) {
+      this.bgShowTransition_.play();
+    }
     this.popupShowTransition_.play();
   } else {
     this.onShow();
@@ -507,7 +509,7 @@ goog.ui.ModalPopup.prototype.hide_ = function() {
   // setVisible (such as goog.ui.Dialog).
   this.visible_ = false;
 
-  if (this.popupHideTransition_ && this.bgHideTransition_) {
+  if (this.popupHideTransition_) {
     goog.events.listenOnce(
         /** @type {!goog.events.EventTarget} */ (this.popupHideTransition_),
         goog.fx.Transition.EventType.END, this.onHide, false, this);
@@ -515,7 +517,9 @@ goog.ui.ModalPopup.prototype.hide_ = function() {
     // The transition whose END event you are listening to must be played last
     // to prevent errors when disposing on hide event, which occur on browsers
     // that do not support CSS3 transitions.
-    this.popupHideTransition_.play();
+    if (this.bgHideTransition_) {
+      this.bgHideTransition_.play();
+    }
   } else {
     this.onHide();
   }
