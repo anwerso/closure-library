@@ -371,8 +371,8 @@ goog.ui.ModalPopup.prototype.exitDocument = function() {
 
   goog.ui.ModalPopup.base(this, 'exitDocument');
   goog.dom.removeNode(this.bgIframeEl_);
-  goog.dom.removeNode(this.bgEl_);
   goog.dom.removeNode(this.tabCatcherElement_);
+  goog.dom.removeNode(this.bgEl_);
 };
 
 
