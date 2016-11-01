@@ -829,7 +829,8 @@ goog.style.translateRectForAnotherFrame = function(rect, origBase, newBase) {
 goog.style.getRelativePosition = function(a, b) {
   var ap = goog.style.getClientPosition(a);
   var bp = goog.style.getClientPosition(b);
-  return new goog.math.Coordinate(ap.x - bp.x, ap.y - bp.y);
+  return new goog.math.Coordinate(Math.round(ap.x) - Math.round(bp.x),
+      Math.round(ap.y) - Math.round(bp.y));
 };
 
 
