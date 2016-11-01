@@ -547,6 +547,7 @@ goog.ui.PopupBase.prototype.show_ = function() {
     // close it on mousedowns in the document it's in.
     this.handler_.listen(doc,
         [goog.events.EventType.MOUSEDOWN, goog.events.EventType.TOUCHSTART],
+        this.onDocumentMouseDown_, true);
 
     if (goog.userAgent.IE) {
       // We want to know about deactivates/mousedowns on the document with focus
@@ -582,7 +583,7 @@ goog.ui.PopupBase.prototype.show_ = function() {
       // on the activeElement (in which case the popup should hide).
       this.handler_.listen(doc,
           [goog.events.EventType.MOUSEDOWN, goog.events.EventType.TOUCHSTART],
-          true);
+          this.onDocumentMouseDown_, true);
 
       // If the active element inside the focused document changes, then
       // we probably need to hide the popup.
