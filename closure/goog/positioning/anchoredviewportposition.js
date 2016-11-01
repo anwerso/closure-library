@@ -133,6 +133,7 @@ goog.positioning.AnchoredViewportPosition.prototype.setLastResortOverflow =
  */
 goog.positioning.AnchoredViewportPosition.prototype.reposition = function(
     movableElement, movableCorner, opt_margin, opt_preferredSize) {
+  this.ajustedCorner = null;
   var status = goog.positioning.positionAtAnchor(
       this.element, this.corner, movableElement, movableCorner, null,
       opt_margin,
@@ -183,5 +184,6 @@ goog.positioning.AnchoredViewportPosition.prototype.adjustCorner = function(
     corner = goog.positioning.flipCornerVertical(corner);
   }
 
+  this.ajustedCorner = corner;
   return corner;
 };
