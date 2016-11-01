@@ -165,6 +165,17 @@ goog.net.XhrManager.prototype.getOutstandingRequestIds = function() {
 
 
 /**
+ * Returns true if reuqest either in flight, or waiting to be sent for
+ * request id.
+ * @param {string} id The id of the request.
+ * @return {boolean}
+ */
+goog.net.XhrManager.prototype.isBusy = function(id) {
+  return !!this.requests_.get(id);
+};
+
+
+/**
  * Registers the given request to be sent. Throws an error if a request
  * already exists with the given ID.
  * NOTE: It is not sent immediately. It is buffered and will be sent when an
