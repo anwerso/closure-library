@@ -456,7 +456,7 @@ goog.fx.DragListGroup.prototype.recacheListAndItemBounds_ = function(
     dragList.dlgBounds_ = goog.style.getBounds(dragList);
   }
 
-  for (var i = 0, n = this.dragItems_.length; i < n; i++) {
+  for (i = 0, n = this.dragItems_.length; i < n; i++) {
     var dragItem = this.dragItems_[i];
     if (dragItem != currDragItem) {
       dragItem.dlgBounds_ = goog.style.getBounds(dragItem);
@@ -751,7 +751,7 @@ goog.fx.DragListGroup.prototype.cleanup_ = function(opt_e) {
   for (var i = 0, n = this.dragLists_.length; i < n; i++) {
     this.dragLists_[i].dlgBounds_ = null;
   }
-  for (var i = 0, n = this.dragItems_.length; i < n; i++) {
+  for (i = 0, n = this.dragItems_.length; i < n; i++) {
     this.dragItems_[i].dlgBounds_ = null;
   }
 };
@@ -1017,7 +1017,7 @@ goog.fx.DragListGroup.prototype.getHoverNextItem_ = function(
   var getRelevantBoundFn;
   var isBeforeFn;
   var pickClosestRow = false;
-  var distanceToClosestRow = undefined;
+  var distanceToClosestRow;
   switch (hoverList.dlgGrowthDirection_) {
     case goog.fx.DragListDirection.DOWN:
       // "Before" means draggerElCenter.y is less than item's bottom y-value.
@@ -1119,7 +1119,7 @@ goog.fx.DragListGroup.prototype.getHoverNextItem_ = function(
 goog.fx.DragListGroup.verticalDistanceFromItem_ = function(item, target) {
   var itemBounds = item.dlgBounds_;
   var itemCenterY = itemBounds.top + (itemBounds.height - 1) / 2;
-  return Math.abs(target.y - itemCenterY);
+  return Math.round(Math.abs(target.y - itemCenterY));
 };
 
 
