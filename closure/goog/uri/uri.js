@@ -1411,9 +1411,9 @@ goog.Uri.QueryData.prototype.toString = function() {
       var param = encodedKey;
       // Ensure that null and undefined are encoded into the url as
       // literal strings.
-      if (val[j] !== '') {
+      // if (val[j] !== '') {
         param += '=' + goog.string.urlEncode(val[j]);
-      }
+      // }
       sb.push(param);
     }
   }
