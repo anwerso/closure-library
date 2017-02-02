@@ -88,7 +88,8 @@ WebChannelBaseTransport.Channel = function(url, opt_options) {
   /**
    * @private {!WebChannelBase} The underlying channel object.
    */
-  this.channel_ = new WebChannelBase(opt_options);
+  this.channel_ = new WebChannelBase(
+      opt_options, goog.net.WebChannelTransport.CLIENT_VERSION);
 
   /**
    * @private {string} The URL of the target server end-point.
@@ -134,6 +135,13 @@ WebChannelBaseTransport.Channel = function(url, opt_options) {
   }
 
   this.channel_.setExtraHeaders(messageHeaders);
+
+  var httpHeadersOverwriteParam =
+      opt_options && opt_options.httpHeadersOverwriteParam;
+  if (httpHeadersOverwriteParam &&
+      !goog.string.isEmptyOrWhitespace(httpHeadersOverwriteParam)) {
+    this.channel_.setHttpHeadersOverwriteParam(httpHeadersOverwriteParam);
+  }
 
   /**
    * @private {boolean} Whether to enable CORS.
