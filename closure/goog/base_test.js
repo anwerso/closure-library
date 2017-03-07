@@ -132,6 +132,27 @@ function testProvideWatch() {
   delete goog.yoddle;
 }
 
+// Namespaces should not conflict with elements added to the window based on
+// their id
+function testConflictingSymbolAndId() {
+  // Create a div with a given id
+  var divElement = document.createElement('div');
+  divElement.id = 'clashingname';
+  document.body.appendChild(divElement);
+
+  // The object at window.clashingname is the element with that id
+  assertEquals(window.clashingname, divElement);
+
+  // Export a symbol to a sub-namespace of that id
+  var symbolObject = {};
+  goog.exportSymbol('clashingname.symbolname', symbolObject);
+
+  // The symbol has been added...
+  assertEquals(window.clashingname.symbolname, symbolObject);
+
+  // ...and has not affected the original div
+  assertEquals(window.clashingname, divElement);
+}
 
 function testProvideStrictness() {
   // alias to avoid the being picked up by the deps scanner.
@@ -1665,6 +1686,80 @@ function testGoogLoadModuleByUrl() {
         goog.loadModuleFromUrl('bogus url');
       });
   assertContains('Cannot write "bogus url" after document load', err.message);
+}
+
+
+function testModuleExportSealed() {
+  if (goog.userAgent.IE && !goog.userAgent.isVersionOrHigher('9')) {
+    // IE before 9 don't support sealing objects
+    return;
+  }
+
+  goog.loadModule('goog.module("a.b.supplied"); exports.foo = {};');
+  var exports0 = goog.module.get('a.b.supplied');
+  assertTrue(Object.isSealed(exports0));
+
+  goog.loadModule('goog.module("a.b.object"); exports = {};');
+  var exports1 = goog.module.get('a.b.object');
+  assertTrue(Object.isSealed(exports1));
+
+
+  goog.loadModule('goog.module("a.b.fn"); exports = function() {};');
+  var exports2 = goog.module.get('a.b.fn');
+  assertFalse(Object.isSealed(exports2));
+}
+
+function testWorkaroundSafari10EvalBug0() {
+  // Validate the safari module loading workaround isn't triggered for
+  // browsers we know it isn't needed.
+  if (goog.userAgent.SAFARI) {
+    return;
+  }
+  assertFalse(goog.useSafari10Workaround());
+}
+
+function testWorkaroundSafari10EvalBug1() {
+  assertEquals(
+      '(function(){' +  // no \n
+          'goog.module(\'foo\');\n' +
+          '\n;})();\n',
+      goog.workaroundSafari10EvalBug(
+          'goog.module(\'foo\');\n'));
+}
+
+
+function testWorkaroundSafari10EvalBug2() {
+  assertEquals(
+      '(function(){' +  // no \n
+          'goog.module(\'foo\');\n' +
+          'alert("//# sourceMappingURL a.b.c.map")\n' +
+          'alert("//# sourceURL a.b.c.js")\n' +
+          '\n;})();\n',
+      goog.workaroundSafari10EvalBug(
+          'goog.module(\'foo\');\n' +
+          'alert("//# sourceMappingURL a.b.c.map")\n' +
+          'alert("//# sourceURL a.b.c.js")\n'));
+}
+
+function testGoogLoadModuleInSafari10() {
+  try {
+    eval('let es6 = 1');
+  } catch (e) {
+    // If ES6 block scope syntax isn't supported, don't run the rest of the
+    // test.
+    return;
+  }
+
+  goog.loadModule(
+      'goog.module("a.safari.test");' +
+      'let x = true;' +
+      'function fn() { return x }' +
+      'exports.fn = fn;');
+  var exports = goog.module.get('a.safari.test');
+
+  // Safari 10 will throw an exception if the module being loaded is eval'd
+  // without a containing function.
+  assertNotThrows(exports.fn);
 }
 
 

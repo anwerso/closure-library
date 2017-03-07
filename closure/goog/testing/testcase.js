@@ -37,10 +37,10 @@ goog.require('goog.array');
 goog.require('goog.asserts');
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
+goog.require('goog.json');
 goog.require('goog.object');
 goog.require('goog.testing.JsUnitException');
 goog.require('goog.testing.asserts');
-goog.require('goog.testing.stacktrace');
 
 
 
@@ -653,6 +653,8 @@ goog.testing.TestCase.prototype.getReport = function(opt_verbose) {
 
   if (this.running) {
     rv.push(this.name_ + ' [RUNNING]');
+  } else if (this.result_.runCount == 0) {
+    rv.push(this.name_ + ' [NO TESTS RUN]');
   } else {
     var label = this.result_.isSuccess() ? 'PASSED' : 'FAILED';
     rv.push(this.name_ + ' [' + label + ']');
@@ -708,11 +710,46 @@ goog.testing.TestCase.prototype.getNumFilesLoaded = function() {
  * Returns the test results object: a map from test names to a list of test
  * failures (if any exist).
  * @return {!Object<string, !Array<string>>} Tests results object.
+ * @deprecated
  */
+// TODO(dankurka): Delete this once testing infrastructure has been updated
+// and released
 goog.testing.TestCase.prototype.getTestResults = function() {
-  return this.result_.resultsByName;
+  var map = {};
+  goog.object.forEach(this.result_.resultsByName, function(resultArray, key) {
+    // Make sure we only use properties on the actual map
+    if (!Object.prototype.hasOwnProperty.call(
+            this.result_.resultsByName, key)) {
+      return;
+    }
+    map[key] = [];
+    for (var j = 0; j < resultArray.length; j++) {
+      map[key].push(resultArray[j].toString());
+    }
+  }, this);
+  return map;
 };
 
+/**
+ * Returns the test results as json.
+ * This is called by the testing infrastructure through G_testrunner.
+ * @return {string} Tests results object.
+ */
+goog.testing.TestCase.prototype.getTestResultsAsJson = function() {
+  var map = {};
+  goog.object.forEach(this.result_.resultsByName, function(resultArray, key) {
+    // Make sure we only use properties on the actual map
+    if (!Object.prototype.hasOwnProperty.call(
+            this.result_.resultsByName, key)) {
+      return;
+    }
+    map[key] = [];
+    for (var j = 0; j < resultArray.length; j++) {
+      map[key].push(resultArray[j].toObject_());
+    }
+  }, this);
+  return goog.json.serialize(map);
+};
 
 /**
  * Executes each of the tests, yielding asynchronously if execution time
@@ -1428,9 +1465,9 @@ goog.testing.TestCase.prototype.recordError_ = function(testName, opt_e) {
   var err = this.logError(testName, opt_e);
   this.result_.errors.push(err);
   if (testName in this.result_.resultsByName) {
-    this.result_.resultsByName[testName].push(err.toString());
+    this.result_.resultsByName[testName].push(err);
   } else {
-    this.result_.resultsByName[testName] = [err.toString()];
+    this.result_.resultsByName[testName] = [err];
   }
 };
 
@@ -1492,8 +1529,7 @@ goog.testing.TestCase.prototype.logError = function(name, opt_e) {
       errMsg = opt_e;
     } else {
       errMsg = opt_e.message || opt_e.description || opt_e.toString();
-      stack = opt_e.stack ? goog.testing.stacktrace.canonicalize(opt_e.stack) :
-                            opt_e['stackTrace'];
+      stack = opt_e.stack ? opt_e.stack : opt_e['stackTrace'];
     }
   } else {
     errMsg = 'An unknown error occurred';
@@ -1608,7 +1644,7 @@ goog.testing.TestCase.Result = function(testCase) {
    * as the key in the map, and the array of strings is an optional list
    * of failure messages. If the array is empty, the test passed. Otherwise,
    * the test failed.
-   * @type {!Object<string, !Array<string>>}
+   * @type {!Object<string, !Array<goog.testing.TestCase.Error>>}
    */
   this.resultsByName = {};
 
@@ -1814,4 +1850,18 @@ goog.testing.TestCase.Error = function(source, message, opt_stack) {
 goog.testing.TestCase.Error.prototype.toString = function() {
   return 'ERROR in ' + this.source + '\n' + this.message +
       (this.stack ? '\n' + this.stack : '');
+};
+
+/**
+ * Returns an object representing the error suitable for JSON serialization.
+ * @return {{source: string, message: string, stacktrace: string}} An object
+ *     representation of the error.
+ * @private
+ */
+goog.testing.TestCase.Error.prototype.toObject_ = function() {
+  return {
+    'source': this.source,
+    'message': this.message,
+    'stacktrace': this.stack || ''
+  };
 };
