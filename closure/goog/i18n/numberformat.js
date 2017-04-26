@@ -320,7 +320,7 @@ goog.i18n.NumberFormat.prototype.applyPattern_ = function(pattern) {
     this.negativeSuffix_ = this.parseAffix_(pattern, pos);
   } else {
     // if no negative affix specified, they share the same positive affix
-    this.negativePrefix_ = this.positivePrefix_ + this.negativePrefix_;
+    this.negativePrefix_ += this.positivePrefix_;
     this.negativeSuffix_ += this.positiveSuffix_;
   }
 };
@@ -1059,7 +1059,7 @@ goog.i18n.NumberFormat.PATTERN_EXPONENT_ = 'E';
 
 
 /**
- * An plus character.
+ * A plus character.
  * @type {string}
  * @private
  */
@@ -1067,7 +1067,7 @@ goog.i18n.NumberFormat.PATTERN_PLUS_ = '+';
 
 
 /**
- * A quote character.
+ * A generic currency sign character.
  * @type {string}
  * @private
  */

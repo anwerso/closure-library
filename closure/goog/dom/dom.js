@@ -403,9 +403,14 @@ goog.dom.$$ = goog.dom.getElementsByTagNameAndClass;
  *
  * @param {Element} element DOM node to set properties on.
  * @param {Object} properties Hash of property:value pairs.
+ *     Property values can be strings or goog.string.TypedString values (such as
+ *     goog.html.SafeUrl).
  */
 goog.dom.setProperties = function(element, properties) {
   goog.object.forEach(properties, function(val, key) {
+    if (val && val.implementsGoogStringTypedString) {
+      val = val.getTypedStringValue();
+    }
     if (key == 'style') {
       element.style.cssText = val;
     } else if (key == 'class') {
@@ -726,7 +731,7 @@ goog.dom.getWindow = function(opt_doc) {
  * @private
  */
 goog.dom.getWindow_ = function(doc) {
-  return doc.parentWindow || doc.defaultView;
+  return /** @type {!Window} */ (doc.parentWindow || doc.defaultView);
 };
 
 
@@ -1446,8 +1451,8 @@ goog.dom.getParentElement = function(element) {
 
 /**
  * Whether a node contains another node.
- * @param {?Node} parent The node that should contain the other node.
- * @param {?Node} descendant The node to test presence of.
+ * @param {?Node|undefined} parent The node that should contain the other node.
+ * @param {?Node|undefined} descendant The node to test presence of.
  * @return {boolean} Whether the parent node contains the descendent node.
  */
 goog.dom.contains = function(parent, descendant) {

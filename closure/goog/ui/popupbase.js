@@ -556,7 +556,7 @@ goog.ui.PopupBase.prototype.show_ = function() {
       // The active element in the top-level document will remain the iframe
       // itself.
       var activeElement;
-      /** @preserveTry */
+
       try {
         activeElement = doc.activeElement;
       } catch (e) {
@@ -566,7 +566,7 @@ goog.ui.PopupBase.prototype.show_ = function() {
       }
       while (activeElement &&
              activeElement.nodeName == goog.dom.TagName.IFRAME) {
-        /** @preserveTry */
+
         try {
           var tempDoc = goog.dom.getFrameContentDocument(activeElement);
         } catch (e) {

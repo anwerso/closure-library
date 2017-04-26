@@ -1817,7 +1817,7 @@ goog.style.getFontFamily = function(el) {
   if (doc.body.createTextRange && goog.dom.contains(doc, el)) {
     var range = doc.body.createTextRange();
     range.moveToElementText(el);
-    /** @preserveTry */
+
     try {
       font = range.queryCommandValue('FontName');
     } catch (e) {
