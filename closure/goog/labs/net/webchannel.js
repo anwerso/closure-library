@@ -121,8 +121,15 @@ goog.net.WebChannel = function() {};
  *
  * backgroundChannelTest: whether to run the channel test (detecting networking
  * conditions) as a background process so the OPEN event will be fired sooner
- * to reduce the initial handshake delay. This option defaults to false now.
- * Eventually we may turn this flag on by default.
+ * to reduce the initial handshake delay. This option defaults to true.
+ *
+ * fastHandshake: experimental feature to speed up the initial handshake, e.g.
+ * leveraging QUIC 0-RTT, in-band version negotiation. This option defaults
+ * to false. To set this option to true, backgroundChannelTest needs be set
+ * to true too. Note it is allowed to send messages before the Open event is
+ * received after a channel has been connected. In order to enable 0-RTT,
+ * messages may be encoded as part of URL and therefore there will be a size
+ * limit for those immediate messages (e.g. 4KB).
  *
  * @typedef {{
  *   messageHeaders: (!Object<string, string>|undefined),
@@ -135,7 +142,8 @@ goog.net.WebChannel = function() {};
  *   sendRawJson: (boolean|undefined),
  *   httpSessionIdParam: (string|undefined),
  *   httpHeadersOverwriteParam: (string|undefined),
- *   backgroundChannelTest: (boolean|undefined)
+ *   backgroundChannelTest: (boolean|undefined),
+ *   fastHandshake: (boolean|undefined)
  * }}
  */
 goog.net.WebChannel.Options;
@@ -187,7 +195,13 @@ goog.net.WebChannel.EventType = {
   /** Dispatched when the channel is closed. */
   CLOSE: goog.events.getUniqueId('close'),
 
-  /** Dispatched when the channel is aborted due to errors. */
+  /**
+   * Dispatched when the channel is aborted due to errors.
+   *
+   * For backward compatibility reasons, a CLOSE event will also be
+   * dispatched, following the ERROR event, which indicates that the channel
+   * has been completely shutdown .
+   */
   ERROR: goog.events.getUniqueId('error'),
 
   /** Dispatched when the channel has received a new message. */

@@ -34,6 +34,7 @@ goog.require('goog.string.Const');
 goog.require('goog.string.Unicode');
 goog.require('goog.testing.PropertyReplacer');
 goog.require('goog.testing.asserts');
+goog.require('goog.testing.jsunit');
 goog.require('goog.userAgent');
 goog.require('goog.userAgent.product');
 goog.require('goog.userAgent.product.isVersion');
@@ -223,6 +224,17 @@ function testGetElementByClass() {
   assertNotNull(goog.dom.getElementByClass('test1', container));
 }
 
+function testGetElementByTagNameAndClass() {
+  assertNotNull(goog.dom.getElementByTagNameAndClass('', 'test1'));
+  assertNotNull(goog.dom.getElementByTagNameAndClass('*', 'test1'));
+  assertNotNull(goog.dom.getElementByTagNameAndClass('span', 'test1'));
+  assertNull(goog.dom.getElementByTagNameAndClass('div', 'test1'));
+  assertNull(goog.dom.getElementByTagNameAndClass('*', 'nonexistant'));
+
+  var container = goog.dom.getElement('span-container');
+  assertNotNull(goog.dom.getElementByTagNameAndClass('*', 'test1', container));
+}
+
 function testSetProperties() {
   var attrs = {
     'name': 'test3',
@@ -311,8 +323,6 @@ function testGetViewportSize() {
 function testGetViewportSizeInIframe() {
   var iframe = /** @type {HTMLIFrameElement} */ (goog.dom.getElement('iframe'));
   var contentDoc = goog.dom.getFrameContentDocument(iframe);
-  contentDoc.write('<body></body>');
-
   var outerSize = goog.dom.getViewportSize();
   var innerSize = (new goog.dom.DomHelper(contentDoc)).getViewportSize();
   assert('Viewport sizes must not match', innerSize.width != outerSize.width);
