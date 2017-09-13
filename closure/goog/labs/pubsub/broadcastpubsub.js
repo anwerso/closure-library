@@ -135,7 +135,7 @@ goog.labs.pubsub.BroadcastPubSub.prototype.handleStorageEvent_ = function(e) {
   }
 
   // IE return empty string instead of null after removing value from localStorage.
-  var data = JSON.parse(browserEvent.newValue || null));
+  var data = JSON.parse(browserEvent.newValue || null);
   var args = goog.isObject(data) && data['args'];
   if (goog.isArray(args) && goog.array.every(args, goog.isString)) {
     this.dispatch_(args);
