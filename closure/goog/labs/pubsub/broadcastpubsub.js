@@ -21,7 +21,6 @@ goog.require('goog.array');
 goog.require('goog.async.run');
 goog.require('goog.events.EventHandler');
 goog.require('goog.events.EventType');
-goog.require('goog.json');
 goog.require('goog.log');
 goog.require('goog.math');
 goog.require('goog.pubsub.PubSub');
@@ -135,9 +134,8 @@ goog.labs.pubsub.BroadcastPubSub.prototype.handleStorageEvent_ = function(e) {
     return;
   }
 
-
   // IE return empty string instead of null after removing value from localStorage.
-  var data = goog.json.parse(browserEvent.newValue || null);
+  var data = JSON.parse(browserEvent.newValue || null));
   var args = goog.isObject(data) && data['args'];
   if (goog.isArray(args) && goog.array.every(args, goog.isString)) {
     this.dispatch_(args);
