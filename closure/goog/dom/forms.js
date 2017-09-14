@@ -121,6 +121,7 @@ goog.dom.forms.submitFormDataInNewWindow = function(
  * @param {HTMLFormElement} form The form.
  * @return {!goog.structs.Map<string, !Array<string>>} A map of the form data
  *     as field name to arrays of values.
+ * @suppress {deprecated} Using deprecated goog.structs.Map
  */
 goog.dom.forms.getFormDataMap = function(form) {
   var map = new goog.structs.Map();

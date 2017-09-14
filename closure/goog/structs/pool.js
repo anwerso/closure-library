@@ -36,6 +36,7 @@ goog.require('goog.structs.Set');
  * @constructor
  * @extends {goog.Disposable}
  * @template T
+ * @suppress {deprecated} Using deprecated goog.structs.Set
  */
 goog.structs.Pool = function(opt_minCount, opt_maxCount) {
   goog.Disposable.call(this);

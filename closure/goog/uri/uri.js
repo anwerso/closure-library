@@ -1104,6 +1104,7 @@ goog.Uri.QueryData = function(opt_query, opt_uri, opt_ignoreCase) {
  * If the underlying key map is not yet initialized, it parses the
  * query string and fills the map with parsed data.
  * @private
+ * @suppress {deprecated} Using deprecated goog.structs.Map
  */
 goog.Uri.QueryData.prototype.ensureKeyMapInitialized_ = function() {
   if (!this.keyMap_) {

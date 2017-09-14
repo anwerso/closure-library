@@ -59,6 +59,7 @@ goog.require('goog.structs.Map');
  *     (Default: false).
  * @constructor
  * @extends {goog.events.EventTarget}
+ * @suppress {deprecated} Using deprecated goog.structs.Map
  */
 goog.net.XhrManager = function(
     opt_maxRetries, opt_headers, opt_minCount, opt_maxCount,

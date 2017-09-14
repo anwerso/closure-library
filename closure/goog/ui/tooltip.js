@@ -59,6 +59,7 @@ goog.require('goog.ui.PopupBase');
  * @param {goog.dom.DomHelper=} opt_domHelper Optional DOM helper.
  * @constructor
  * @extends {goog.ui.Popup}
+ * @suppress {deprecated} Using deprecated goog.structs.Set
  */
 goog.ui.Tooltip = function(opt_el, opt_str, opt_domHelper) {
   /**
