@@ -83,6 +83,9 @@ goog.net.WebChannel = function() {};
  * an auth header to the server, which only checks the auth header at the time
  * when the channel is opened.
  *
+ * messageContentType: sent as initMessageHeaders via X-WebChannel-Content-Type,
+ * to inform the server the MIME type of WebChannel messages.
+ *
  * messageUrlParams: custom url query parameters to be added to every message
  * sent to the server. This object is mutable, and custom parameters may be
  * changed, removed or added during the runtime after a channel has been opened.
@@ -131,9 +134,14 @@ goog.net.WebChannel = function() {};
  * messages may be encoded as part of URL and therefore there will be a size
  * limit for those immediate messages (e.g. 4KB).
  *
+ * disableRedact: whether to disable logging redact. By default, redact is
+ * enabled to remove any message payload or user-provided info
+ * from closure logs.
+ *
  * @typedef {{
  *   messageHeaders: (!Object<string, string>|undefined),
  *   initMessageHeaders: (!Object<string, string>|undefined),
+ *   messageContentType: (string|undefined),
  *   messageUrlParams: (!Object<string, string>|undefined),
  *   clientProtocolHeaderRequired: (boolean|undefined),
  *   concurrentRequestLimit: (number|undefined),
@@ -143,7 +151,8 @@ goog.net.WebChannel = function() {};
  *   httpSessionIdParam: (string|undefined),
  *   httpHeadersOverwriteParam: (string|undefined),
  *   backgroundChannelTest: (boolean|undefined),
- *   fastHandshake: (boolean|undefined)
+ *   fastHandshake: (boolean|undefined),
+ *   enableRedact: (boolean|undefined)
  * }}
  */
 goog.net.WebChannel.Options;
@@ -158,7 +167,7 @@ goog.net.WebChannel.Options;
  * Unicode strings (sent by the server) may or may not need be escaped, as
  * decided by the server.
  *
- * @typedef {(ArrayBuffer|Blob|Object<string, Object|string>|Array)}
+ * @typedef {(!ArrayBuffer|!Blob|!Object<string, !Object|string>|!Array|string)}
  */
 goog.net.WebChannel.MessageData;
 
@@ -496,3 +505,13 @@ goog.net.WebChannel.X_CLIENT_WIRE_PROTOCOL = 'X-Client-Wire-Protocol';
  * @type {string}
  */
 goog.net.WebChannel.X_HTTP_SESSION_ID = 'X-HTTP-Session-Id';
+
+
+/**
+ * A request header for specifying the content-type of WebChannel messages,
+ * e.g. application-defined JSON encoding styles. Currently this header
+ * is sent by the client via initMessageHeaders when the channel is opened.
+ *
+ * @type {string}
+ */
+goog.net.WebChannel.X_WEBCHANNEL_CONTENT_TYPE = 'X-WebChannel-Content-Type';

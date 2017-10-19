@@ -47,8 +47,7 @@ goog.spell.SpellCheck = function(opt_lookupFunction, opt_language) {
 
   /**
    * Function used to lookup spelling of words.
-   * @type {Function}
-   * @private
+   * @private {Function}
    */
   this.lookupFunction_ = opt_lookupFunction || null;
 
@@ -98,7 +97,7 @@ goog.spell.SpellCheck.EventType = {
 
 
 /**
- * Cache. Shared across all spell checker instances. Map with langauge as the
+ * Cache. Shared across all spell checker instances. Map with language as the
  * key and a cache for that language as the value.
  *
  * @type {Object}
@@ -174,7 +173,7 @@ goog.spell.SpellCheck.CacheIndex = {
  * @type {string}
  */
 goog.spell.SpellCheck.WORD_BOUNDARY_CHARS =
-    '\t\r\n\u00A0 !\"#$%&()*+,\-.\/:;<=>?@\[\\\]^_`{|}~';
+    '\t\r\n\u00A0 !\"#$%&()*+,-./\\\\:;<=>?@\\[\\]^_`{|}~';
 
 
 /**
