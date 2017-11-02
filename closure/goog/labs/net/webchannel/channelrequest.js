@@ -562,8 +562,10 @@ ChannelRequest.prototype.xmlHttpHandler_ = function(xmlhttp) {
   } catch (ex) {
     this.channelDebug_.debug('Failed call to OnXmlHttpReadyStateChanged_');
     if (this.xmlHttp_ && this.xmlHttp_.getResponseText()) {
-      this.channelDebug_.dumpException(
-          ex, 'ResponseText: ' + this.xmlHttp_.getResponseText());
+      var channelRequest = this;
+      this.channelDebug_.dumpException(ex, function() {
+        return 'ResponseText: ' + channelRequest.xmlHttp_.getResponseText();
+      });
     } else {
       this.channelDebug_.dumpException(ex, 'No response text');
     }
@@ -615,8 +617,11 @@ ChannelRequest.prototype.onXmlHttpReadyStateChanged_ = function() {
   this.lastStatusCode_ = status;
   var responseText = this.xmlHttp_.getResponseText();
   if (!responseText) {
-    this.channelDebug_.debug(
-        'No response text for uri ' + this.requestUri_ + ' status ' + status);
+    var channelRequest = this;
+    this.channelDebug_.debug(function() {
+      return 'No response text for uri ' + channelRequest.requestUri_ +
+          ' status ' + status;
+    });
   }
   this.successful_ = (status == 200);
 
@@ -816,6 +821,9 @@ ChannelRequest.prototype.getNextChunk_ = function(responseText) {
  * For Chrome Apps, sendBeacon is always necessary due to Content Security
  * Policy (CSP) violation of using an IMG tag.
  *
+ * For react-native, we use xhr to send the actual close request, and assume
+ * there is no page-close issue with react-native.
+ *
  * @param {goog.Uri} uri The uri to send a request to.
  */
 ChannelRequest.prototype.sendCloseRequest = function(uri) {
@@ -830,9 +838,16 @@ ChannelRequest.prototype.sendCloseRequest = function(uri) {
         goog.global.navigator.sendBeacon(this.baseUri_.toString(), '');
   }
 
-  if (!requestSent) {
+  if (!requestSent && goog.global.Image) {
     var eltImg = new Image();
     eltImg.src = this.baseUri_;
+    requestSent = true;
+  }
+
+  if (!requestSent) {
+    // no handler is set to match the sendBeacon/Image behavior
+    this.xmlHttp_ = this.channel_.createXhrIo(null);
+    this.xmlHttp_.send(this.baseUri_);
   }
 
   this.requestStartTime_ = goog.now();
