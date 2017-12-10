@@ -513,13 +513,13 @@ goog.ui.ModalPopup.prototype.hide_ = function() {
     goog.events.listenOnce(
         /** @type {!goog.events.EventTarget} */ (this.popupHideTransition_),
         goog.fx.Transition.EventType.END, this.onHide, false, this);
-    this.bgHideTransition_.play();
-    // The transition whose END event you are listening to must be played last
-    // to prevent errors when disposing on hide event, which occur on browsers
-    // that do not support CSS3 transitions.
     if (this.bgHideTransition_) {
       this.bgHideTransition_.play();
     }
+    // The transition whose END event you are listening to must be played last
+    // to prevent errors when disposing on hide event, which occur on browsers
+    // that do not support CSS3 transitions.
+    this.popupHideTransition_.play();
   } else {
     this.onHide();
   }
