@@ -1283,11 +1283,11 @@ goog.style.isElementShown = function(el) {
  * @param {?Node=} opt_node Node whose parent document should have the
  *     styles installed.
  * @return {!HTMLStyleElement|!StyleSheet} In IE<11, a StyleSheet object with no
- *     owning <style> tag (this is how IE creates style sheets).  In every other
- *     browser, a <style> element with an attached style.  This doesn't return a
- *     StyleSheet object so that setSafeStyleSheet can replace it (otherwise, if
- *     you pass a StyleSheet to setSafeStyleSheet, it will make a new StyleSheet
- *     and leave the original StyleSheet orphaned).
+ *     owning &lt;style&gt; tag (this is how IE creates style sheets).  In every
+ *     other browser, a &lt;style&gt; element with an attached style.  This
+ *     doesn't return a StyleSheet object so that setSafeStyleSheet can replace
+ *     it (otherwise, if you pass a StyleSheet to setSafeStyleSheet, it will
+ *     make a new StyleSheet and leave the original StyleSheet orphaned).
  */
 goog.style.installSafeStyleSheet = function(safeStyleSheet, opt_node) {
   var dh = goog.dom.getDomHelper(opt_node);
@@ -1296,6 +1296,7 @@ goog.style.installSafeStyleSheet = function(safeStyleSheet, opt_node) {
   // undefined as of IE 11.
   var doc = dh.getDocument();
   if (goog.userAgent.IE && doc.createStyleSheet) {
+    /** @type {(!HTMLStyleElement|!StyleSheet)} */
     var styleSheet = doc.createStyleSheet();
     goog.style.setSafeStyleSheet(styleSheet, safeStyleSheet);
     return styleSheet;
