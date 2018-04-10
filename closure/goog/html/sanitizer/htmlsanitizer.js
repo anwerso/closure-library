@@ -20,7 +20,7 @@
  * This package provides html sanitizing functions. It does not enforce string
  * to string conversion, instead returning a dom-like element when possible.
  *
- * Examples of usage of the static {@code goog.goog.html.sanitizer.sanitize}:
+ * Examples of usage of the static `goog.goog.html.sanitizer.sanitize`:
  * <pre>
  *   var safeHtml = goog.html.sanitizer.sanitize('<script src="xss.js" />');
  *   goog.dom.safe.setInnerHtml(el, safeHtml);
@@ -229,8 +229,8 @@ goog.html.sanitizer.HtmlSanitizer.wrapUrlPolicy_ = function(urlPolicy) {
 
 
 /**
- * The builder for the HTML Sanitizer. All methods except build return {@code
- * this}.
+ * The builder for the HTML Sanitizer. All methods except build return
+ * `this`.
  * @final @constructor @struct
  */
 goog.html.sanitizer.HtmlSanitizer.Builder = function() {
@@ -1040,7 +1040,7 @@ goog.html.sanitizer.HtmlSanitizer.prototype.preProcessHtml = function(
   // stylesheet information on STYLE tags.
   var inertUnsanitizedDom =
       goog.html.sanitizer.CssSanitizer.safeParseHtmlAndGetInertElement(
-          '<span>' + unsanitizedHtml + '</span>');
+          '<div>' + unsanitizedHtml + '</div>');
   goog.asserts.assert(
       inertUnsanitizedDom,
       'Older browsers that don\'t support inert ' +

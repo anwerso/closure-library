@@ -50,6 +50,7 @@ goog.provide('goog.net.WebChannel');
 
 goog.require('goog.events');
 goog.require('goog.events.Event');
+goog.require('goog.net.XmlHttpFactory');
 
 
 
@@ -148,13 +149,14 @@ goog.net.WebChannel.FailureRecovery = function() {};
  * conditions) as a background process so the OPEN event will be fired sooner
  * to reduce the initial handshake delay. This option defaults to true.
  *
- * fastHandshake: experimental feature to speed up the initial handshake, e.g.
- * leveraging QUIC 0-RTT, in-band version negotiation. This option defaults
- * to false. To set this option to true, backgroundChannelTest needs be set
- * to true too. Note it is allowed to send messages before the Open event is
- * received after a channel has been connected. In order to enable 0-RTT,
- * messages may be encoded as part of URL and therefore there will be a size
- * limit for those immediate messages (e.g. 4KB).
+ * fastHandshake: experimental feature to enable true 0-RTT message delivery,
+ * e.g. by leveraging QUIC 0-RTT (which requires GET to be used). This option
+ * defaults to false. When this option is enabled, backgroundChannelTest will
+ * be forced to true. Note it is allowed to send messages before Open event is
+ * received, after a channel has been connected. In order to enable 0-RTT,
+ * messages need be encoded as part of URL and therefore there needs be a size
+ * limit (e.g. 16KB) for messages that need be sent immediately
+ * as part of the handshake.
  *
  * disableRedact: whether to disable logging redact. By default, redact is
  * enabled to remove any message payload or user-provided info
@@ -164,9 +166,22 @@ goog.net.WebChannel.FailureRecovery = function() {};
  * customized configs that are optimized for certain clients or environments.
  * Currently this information is sent via X-WebChannel-Client-Profile header.
  *
- * failFast: enable the fail-fast behavior which will immediately abort the
- * channel when an HTTP request fails, without attempting any recovery logic.
- * Default is set to false.
+ * internalChannelParams: the internal channel parameter name to allow
+ * experimental channel configurations. Supported options include fastfail,
+ * baseRetryDelayMs, retryDelaySeedMs, forwardChannelMaxRetries and
+ * forwardChannelRequestTimeoutMs. Note that these options are subject to
+ * change.
+ *
+ * xmlHttpFactory: allows the caller to override the factory used to create
+ * XMLHttpRequest objects. This is introduced to disable CORS on firefox OS.
+ *
+ * requestRefreshThresholds: client-side thresholds that decide when to refresh
+ * an underlying HTTP request, to limit memory consumption due to XHR buffering
+ * or compression context. The client-side thresholds should be signficantly
+ * smaller than the server-side thresholds. This allows the client to eliminate
+ * any latency introduced by request refreshing, i.e. an RTT window during which
+ * messages may be buffered on the server-side. Supported params include
+ * totalBytesReceived, totalDurationMs.
  *
  * @typedef {{
  *   messageHeaders: (!Object<string, string>|undefined),
@@ -184,7 +199,9 @@ goog.net.WebChannel.FailureRecovery = function() {};
  *   fastHandshake: (boolean|undefined),
  *   disableRedact: (boolean|undefined),
  *   clientProfile: (string|undefined),
- *   failFast: (boolean|undefined),
+ *   internalChannelParams: (!Object<string, boolean|number>|undefined),
+ *   xmlHttpFactory: (!goog.net.XmlHttpFactory|undefined),
+ *   requestRefreshThresholds: (!Object<string, number>|undefined),
  * }}
  */
 goog.net.WebChannel.Options;
