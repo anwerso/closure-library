@@ -26,6 +26,7 @@ goog.require('goog.array');
 goog.require('goog.asserts');
 goog.require('goog.async.Deferred');
 goog.require('goog.debug.Trace');
+goog.require('goog.disposable.IDisposable');
 goog.require('goog.disposeAll');
 goog.require('goog.loader.AbstractModuleManager');
 goog.require('goog.loader.activeModuleManager');
@@ -42,6 +43,7 @@ goog.require('goog.object');
  * Since modules may not have their code loaded, we must keep track of them.
  * @constructor
  * @extends {goog.loader.AbstractModuleManager}
+ * @implements {goog.disposable.IDisposable}
  * @struct
  */
 goog.module.ModuleManager = function() {
@@ -191,6 +193,11 @@ goog.module.ModuleManager = function() {
    * @private {boolean}
    */
   this.userLastActive_ = false;
+
+  /**
+   * @private {boolean}
+   */
+  this.isDisposed_ = false;
 };
 goog.inherits(goog.module.ModuleManager, goog.loader.AbstractModuleManager);
 
@@ -226,9 +233,7 @@ goog.module.ModuleManager.CORRUPT_RESPONSE_STATUS_CODE =
 
 /** @return {!goog.loader.AbstractModuleManager} */
 goog.module.ModuleManager.getInstance = function() {
-  return goog.loader.activeModuleManager.get(function() {
-    return new goog.module.ModuleManager();
-  });
+  return goog.loader.activeModuleManager.get();
 };
 
 
@@ -575,7 +580,12 @@ goog.module.ModuleManager.prototype.loadModules_ = function(
   var idsToLoadImmediately = this.processModulesForLoad_(ids);
 
   goog.log.info(this.logger_, 'Loading module(s): ' + idsToLoadImmediately);
-  this.loadingModuleIds_ = idsToLoadImmediately;
+
+  if (this.concurrentLoadingEnabled_) {
+    goog.array.extend(this.loadingModuleIds_, idsToLoadImmediately);
+  } else {
+    this.loadingModuleIds_ = idsToLoadImmediately;
+  }
 
   if (this.batchModeEnabled_) {
     this.requestedLoadingModuleIds_ = ids;
@@ -626,12 +636,15 @@ goog.module.ModuleManager.prototype.loadModules_ = function(
  * @private
  */
 goog.module.ModuleManager.prototype.processModulesForLoad_ = function(ids) {
-  for (var i = 0; i < ids.length; i++) {
-    var moduleInfo = this.moduleInfoMap[ids[i]];
+  ids = goog.array.filter(ids, (id) => {
+    let moduleInfo = this.moduleInfoMap[id];
     if (moduleInfo.isLoaded()) {
-      throw new Error('Module already loaded: ' + ids[i]);
+      goog.global.setTimeout(
+          () => new Error('Module already loaded: ' + id), 0);
+      return false;
     }
-  }
+    return true;
+  });
 
   // Build a list of the ids of this module and any of its not-yet-loaded
   // prerequisite modules in dependency order.
@@ -758,6 +771,9 @@ goog.module.ModuleManager.prototype.setLoaded = function(id) {
 
   // Dispatch an active/idle change if needed.
   this.dispatchActiveIdleChangeIfNeeded_();
+
+  this.currentlyLoadingModule_ = null;
+  goog.debug.Trace.stopTracer(this.loadTracer_);
 };
 
 
@@ -863,20 +879,7 @@ goog.module.ModuleManager.prototype.beforeLoadModuleCode = function(id) {
 
 
 /** @override */
-goog.module.ModuleManager.prototype.afterLoadModuleCode = function(id) {
-  if (!this.currentlyLoadingModule_ ||
-      id != this.currentlyLoadingModule_.getId()) {
-    goog.log.error(
-        this.logger_,
-        'afterLoadModuleCode called with module "' + id +
-            '" while loading module "' +
-            (this.currentlyLoadingModule_ &&
-             this.currentlyLoadingModule_.getId()) +
-            '"');
-  }
-  this.currentlyLoadingModule_ = null;
-  goog.debug.Trace.stopTracer(this.loadTracer_);
-};
+goog.module.ModuleManager.prototype.afterLoadModuleCode = function(id) {};
 
 
 /** @override */
@@ -1143,9 +1146,7 @@ goog.module.ModuleManager.prototype.executeCallbacks_ = function(type) {
 
 
 /** @override */
-goog.module.ModuleManager.prototype.disposeInternal = function() {
-  goog.module.ModuleManager.base(this, 'disposeInternal');
-
+goog.module.ModuleManager.prototype.dispose = function() {
   // Dispose of each ModuleInfo object.
   goog.disposeAll(
       goog.object.getValues(this.moduleInfoMap), this.baseModuleInfo_);
@@ -1155,4 +1156,14 @@ goog.module.ModuleManager.prototype.disposeInternal = function() {
   this.userInitiatedLoadingModuleIds_ = [];
   this.requestedModuleIdsQueue_ = [];
   this.callbackMap_ = {};
+  this.isDisposed_ = true;
 };
+
+/** @override */
+goog.module.ModuleManager.prototype.isDisposed = function() {
+  return this.isDisposed_;
+};
+
+goog.loader.activeModuleManager.setDefault(function() {
+  return new goog.module.ModuleManager();
+});

@@ -39,12 +39,12 @@ const DependencyType = {
 class Dependency {
   /**
    * @param {!DependencyType} type
-   * @param {string} path
+   * @param {string} filepath
    * @param {!Array<string>} closureSymbols
    * @param {!Array<!Import>} imports
    * @param {string=} language
    */
-  constructor(type, path, closureSymbols, imports, language = "es3") {
+  constructor(type, filepath, closureSymbols, imports, language = 'es3') {
     /** @const */
     this.type = type;
 
@@ -52,7 +52,7 @@ class Dependency {
      * Full path of this file on disc.
      * @const
      */
-    this.path = path;
+    this.path = path.resolve(filepath);
 
     /**
      * Array of Closure symbols this file provides.
@@ -275,11 +275,25 @@ class Graph {
 
       depStack.add(dep);
 
-      for (const i of dep.imports) {
+      // We might modify the imports when iterating (drop unrecognized ES6
+      // imports), so iterate over a copy.
+      for (const i of [...dep.imports]) {
         const to = this.resolve_(i);
 
         if (!to) {
-          throw new SourceError(`Could not find "${i.symOrPath}".`, dep.path);
+          if (i.isGoogRequire()) {
+            throw new SourceError(`Could not find "${i.symOrPath}".`, dep.path);
+          } else {
+            // Just drop unrecognized ES6 imports. Assume their entire branch is
+            // non-Closure, like a built-in Node module.
+            dep.imports.splice(dep.imports.indexOf(i), 1);
+            console.warn(
+                `Could not find "${i.symOrPath}".` +
+                    'Assuming it (and its transitive dependencies) are ' +
+                    'non-Closure managed.',
+                dep.path);
+            continue;
+          }
         }
 
         i.validate(to);
