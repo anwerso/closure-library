@@ -101,7 +101,6 @@ goog.pubsub.PubSub = function(opt_async) {
   this.async_ = Boolean(opt_async);
 };
 goog.inherits(goog.pubsub.PubSub, goog.Disposable);
-goog.addSingletonGetter(goog.pubsub.PubSub);
 
 
 /**
