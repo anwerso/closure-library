@@ -20,9 +20,9 @@
  * This package provides html sanitizing functions. It does not enforce string
  * to string conversion, instead returning a dom-like element when possible.
  *
- * Examples of usage of the static `goog.goog.html.sanitizer.sanitize`:
+ * Examples of usage of the static `HtmlSanitizer.sanitize`:
  * <pre>
- *   var safeHtml = goog.html.sanitizer.sanitize('<script src="xss.js" />');
+ *   var safeHtml = HtmlSanitizer.sanitize('<script src="xss.js" />');
  *   goog.dom.safe.setInnerHtml(el, safeHtml);
  * </pre>
  *
@@ -469,6 +469,7 @@ goog.html.sanitizer.HtmlSanitizer.Builder.prototype
     .alsoAllowTagsPrivateDoNotAccessOrElse = function(tags) {
   goog.array.forEach(tags, function(tag) {
     this.tagWhitelist_[tag.toUpperCase()] = true;
+    delete this.tagBlacklist_[tag.toUpperCase()];
   }, this);
   return this;
 };
