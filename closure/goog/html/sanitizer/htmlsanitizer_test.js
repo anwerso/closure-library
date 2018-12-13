@@ -1259,7 +1259,7 @@ function testStyleTag_networkUrlPolicy() {
   var input = '<style>a{background-image: url("http://foo.com");}</style>';
   // Safari will strip quotes if they are not needed and add a slash.
   var expected = goog.userAgent.product.SAFARI ?
-      '<style>a{background-image: url(http://foo.com/);}</style>' :
+      '<style>a{background-image: url("http://foo.com/");}</style>' :
       '<style>a{background-image: url("http://foo.com");}</style>';
   assertSanitizedHtml(
       input, expected,
@@ -1670,6 +1670,26 @@ function testHorizontalRuleWithInlineStyles() {
       '<p><span></span></p><hr /><p></p><p><span>bar</span></p></b><br />';
   assertSanitizedHtml(
       input, expected,
+      new goog.html.sanitizer.HtmlSanitizer.Builder()
+          .allowCssStyles()
+          .inlineStyleRules()
+          .build());
+}
+
+function testDetailOpen() {
+  var input = '<details open><summary>foo</summary>This is a test</details>';
+  assertSanitizedHtml(
+      input, input,
+      new goog.html.sanitizer.HtmlSanitizer.Builder()
+          .allowCssStyles()
+          .inlineStyleRules()
+          .build());
+}
+
+function testInputRequired() {
+  var input = '<input required/>';
+  assertSanitizedHtml(
+      input, input,
       new goog.html.sanitizer.HtmlSanitizer.Builder()
           .allowCssStyles()
           .inlineStyleRules()

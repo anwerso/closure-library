@@ -43,6 +43,7 @@ goog.require('goog.events');
 goog.require('goog.events.Event');
 goog.require('goog.events.EventType');
 goog.require('goog.events.KeyCodes');
+goog.require('goog.events.Keys');
 goog.require('goog.fx.Dragger');
 goog.require('goog.html.SafeHtml');
 goog.require('goog.math.Rect');
@@ -159,7 +160,7 @@ goog.ui.Dialog.prototype.title_ = '';
 
 /**
  * Dialog's content (HTML).
- * @type {goog.html.SafeHtml}
+ * @type {?goog.html.SafeHtml}
  * @private
  */
 goog.ui.Dialog.prototype.content_ = null;
@@ -167,7 +168,7 @@ goog.ui.Dialog.prototype.content_ = null;
 
 /**
  * Dragger.
- * @type {goog.fx.Dragger}
+ * @type {?goog.fx.Dragger}
  * @private
  */
 goog.ui.Dialog.prototype.dragger_ = null;
@@ -183,7 +184,7 @@ goog.ui.Dialog.prototype.disposeOnHide_ = false;
 
 /**
  * Element for the title bar.
- * @type {Element}
+ * @type {?Element}
  * @private
  */
 goog.ui.Dialog.prototype.titleEl_ = null;
@@ -191,7 +192,7 @@ goog.ui.Dialog.prototype.titleEl_ = null;
 
 /**
  * Element for the text area of the title bar.
- * @type {Element}
+ * @type {?Element}
  * @private
  */
 goog.ui.Dialog.prototype.titleTextEl_ = null;
@@ -207,7 +208,7 @@ goog.ui.Dialog.prototype.titleTextId_ = null;
 
 /**
  * Element for the close box area of the title bar.
- * @type {Element}
+ * @type {?Element}
  * @private
  */
 goog.ui.Dialog.prototype.titleCloseEl_ = null;
@@ -215,7 +216,7 @@ goog.ui.Dialog.prototype.titleCloseEl_ = null;
 
 /**
  * Element for the content area.
- * @type {Element}
+ * @type {?Element}
  * @private
  */
 goog.ui.Dialog.prototype.contentEl_ = null;
@@ -223,7 +224,7 @@ goog.ui.Dialog.prototype.contentEl_ = null;
 
 /**
  * Element for the button bar.
- * @type {Element}
+ * @type {?Element}
  * @private
  */
 goog.ui.Dialog.prototype.buttonEl_ = null;
@@ -1086,7 +1087,9 @@ goog.ui.Dialog.prototype.onKey_ = function(e) {
           new goog.ui.Dialog.Event(key, String(buttonSet.get(key))));
     }
   } else if (
-      target == this.titleCloseEl_ && e.keyCode == goog.events.KeyCodes.SPACE) {
+      target == this.titleCloseEl_ &&
+      (e.keyCode == goog.events.KeyCodes.SPACE ||
+       e.key == goog.events.Keys.SPACE)) {
     // if the title 'close' button is in focus on 'SPACE,' close the dialog
     this.handleTitleClose_();
   }
@@ -1194,7 +1197,7 @@ goog.ui.Dialog.ButtonSet.prototype.defaultButton_ = null;
 
 /**
  * Optional container the button set should be rendered into.
- * @type {Element}
+ * @type {?Element}
  * @private
  */
 goog.ui.Dialog.ButtonSet.prototype.element_ = null;

@@ -646,7 +646,7 @@ goog.net.XhrManager.Request = function(
 
   /**
    * The XhrIo instance handling this request. Set in handleAvailableXhr.
-   * @type {goog.net.XhrIo}
+   * @type {?goog.net.XhrIo}
    */
   this.xhrIo = null;
 

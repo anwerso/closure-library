@@ -222,9 +222,11 @@ goog.testing.TestCase = function(opt_name) {
    */
   this.onCompletedCallbacks_ = [];
 
-
   /** @type {number|undefined} */
   this.endTime_;
+
+  /** @private {number} */
+  this.testsRanSoFar_ = 0;
 };
 
 
@@ -522,6 +524,7 @@ goog.testing.TestCase.prototype.execute = function() {
   if (!this.prepareForRun_()) {
     return;
   }
+  this.groupLogsStart();
   this.log('Starting tests: ' + this.name_);
   this.cycleTests();
 };
@@ -562,6 +565,7 @@ goog.testing.TestCase.prototype.finalize = function() {
   this.result_.runTime = this.endTime_ - this.startTime_;
   this.result_.numFilesLoaded = this.countNumFilesLoaded_();
   this.result_.complete = true;
+  this.testsRanSoFar_++;
 
   this.log(this.result_.getSummary());
   if (this.result_.isSuccess()) {
@@ -573,6 +577,7 @@ goog.testing.TestCase.prototype.finalize = function() {
     cb();
   });
   this.onCompletedCallbacks_ = [];
+  this.groupLogsEnd();
 };
 
 
@@ -594,13 +599,20 @@ goog.testing.TestCase.prototype.isInsideMultiTestRunner = function() {
   return top && typeof top['_allTests'] != 'undefined';
 };
 
+/**
+ * @return {boolean} Whether the test-progress should be logged to the console.
+ */
+goog.testing.TestCase.prototype.shouldLogTestProgress = function() {
+  return !goog.global['skipClosureTestProgress'] &&
+      !this.isInsideMultiTestRunner();
+};
 
 /**
  * Logs an object to the console, if available.
  * @param {*} val The value to log. Will be ToString'd.
  */
 goog.testing.TestCase.prototype.log = function(val) {
-  if (!this.isInsideMultiTestRunner() && goog.global.console) {
+  if (this.shouldLogTestProgress() && goog.global.console) {
     if (typeof val == 'string') {
       val = this.getTimeStamp_() + ' : ' + val;
     }
@@ -609,6 +621,29 @@ goog.testing.TestCase.prototype.log = function(val) {
     } else {
       goog.global.console.log(val);
     }
+  }
+};
+
+
+/**
+ * Groups the upcoming logs in the same log group
+ */
+goog.testing.TestCase.prototype.groupLogsStart = function() {
+  if (!this.isInsideMultiTestRunner() && goog.global.console &&
+      goog.global.console.group) {
+    goog.global.console.group(
+        'Test #' + (this.testsRanSoFar_ + 1) + ': ' + this.name_);
+  }
+};
+
+
+/**
+ * Closes the group of the upcoming logs
+ */
+goog.testing.TestCase.prototype.groupLogsEnd = function() {
+  if (!this.isInsideMultiTestRunner() && goog.global.console &&
+      goog.global.console.groupEnd) {
+    goog.global.console.groupEnd();
   }
 };
 
@@ -747,6 +782,7 @@ goog.testing.TestCase.prototype.runTestsReturningPromise = function() {
         resolve(this.result_);
         return;
       }
+      this.groupLogsStart();
       this.log('Starting tests: ' + this.name_);
       this.saveMessage('Start');
       this.batchTime_ = this.now();

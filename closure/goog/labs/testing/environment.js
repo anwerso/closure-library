@@ -72,7 +72,7 @@ goog.labs.testing.Environment = goog.defineClass(null, {
 
   /**
    * Runs immediately before the setUpPage phase of JsUnit tests.
-   * @return {!goog.Promise<?>|undefined} An optional Promise which must be
+   * @return {!IThenable<*>|undefined} An optional Promise which must be
    *     resolved before the test is executed.
    */
   setUpPage: function() {
@@ -92,7 +92,7 @@ goog.labs.testing.Environment = goog.defineClass(null, {
 
   /**
    * Runs immediately before the setUp phase of JsUnit tests.
-   * @return {!goog.Promise<?>|undefined} An optional Promise which must be
+   * @return {!IThenable<*>|undefined} An optional Promise which must be
    *     resolved before the test case is executed.
    */
   setUp: goog.nullFunction,
@@ -222,7 +222,8 @@ goog.labs.testing.Environment.console_.setCapturing(true);
  * @extends {goog.testing.TestCase}
  */
 goog.labs.testing.EnvironmentTestCase_ = function() {
-  goog.labs.testing.EnvironmentTestCase_.base(this, 'constructor');
+  goog.labs.testing.EnvironmentTestCase_.base(
+      this, 'constructor', document.title);
 
   /** @private {!Array<!goog.labs.testing.Environment>}> */
   this.environments_ = [];
@@ -325,13 +326,15 @@ goog.labs.testing.EnvironmentTestCase_.prototype.setUp = function() {
  * Calls a chain of methods and makes sure to properly chain them if any of the
  * methods returns a thenable.
  * @param {!Array<function()>} fns
- * @return {!goog.Thenable|undefined}
+ * @return {!IThenable<*>|undefined}
  * @private
  */
 goog.labs.testing.EnvironmentTestCase_.prototype.callAndChainPromises_ =
     function(fns) {
   return goog.array.reduce(fns, function(previousResult, fn) {
-    if (goog.Thenable.isImplementedBy(previousResult)) {
+    if (goog.Thenable.isImplementedBy(previousResult) ||
+        (typeof goog.global['Promise'] === 'function' &&
+         previousResult instanceof goog.global['Promise'])) {
       return previousResult.then(function() {
         return fn();
       });

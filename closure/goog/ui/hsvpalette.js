@@ -206,12 +206,17 @@ goog.ui.HsvPalette.prototype.updateInput = function() {
 /**
  * Sets which color is selected and update the UI.
  * @param {string} color The selected color.
+ * @param {boolean=} opt_disableDispatchEvent (optional) Whether the event
+ * should not be fired.
  */
-goog.ui.HsvPalette.prototype.setColor = function(color) {
+goog.ui.HsvPalette.prototype.setColor = function(
+    color, opt_disableDispatchEvent) {
   if (color != this.color) {
     this.setColorInternal(color);
     this.updateUi();
-    this.dispatchEvent(goog.ui.Component.EventType.ACTION);
+    if (!opt_disableDispatchEvent) {
+      this.dispatchEvent(goog.ui.Component.EventType.ACTION);
+    }
   }
 };
 
@@ -318,6 +323,8 @@ goog.ui.HsvPalette.prototype.createDom = function() {
     'type': goog.dom.InputType.TEXT,
     'dir': 'ltr'
   });
+  // Spellcheck is not necessary, so setting it to false on the inputElement.
+  this.inputElement.spellcheck = false;
 
   var labelElement =
       dom.createDom(goog.dom.TagName.LABEL, null, this.inputElement);

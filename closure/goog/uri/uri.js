@@ -586,7 +586,7 @@ goog.Uri.prototype.getQuery = function() {
  * that key.
  *
  * @param {string} key The parameter to set.
- * @param {*} value The new value.
+ * @param {*} value The new value. Value does not need to be encoded.
  * @return {!goog.Uri} Reference to this URI object.
  */
 goog.Uri.prototype.setParameterValue = function(key, value) {
@@ -606,7 +606,8 @@ goog.Uri.prototype.setParameterValue = function(key, value) {
  *
  * @param {string} key The parameter to set.
  * @param {*} values The new values. If values is a single
- *     string then it will be treated as the sole value.
+ *     string then it will be treated as the sole value. Values do not need to
+ *     be encoded.
  * @return {!goog.Uri} Reference to this URI object.
  */
 goog.Uri.prototype.setParameterValues = function(key, values) {
@@ -1057,7 +1058,7 @@ goog.Uri.QueryData = function(opt_query, opt_uri, opt_ignoreCase) {
    * We need to use a Map because we cannot guarantee that the key names will
    * not be problematic for IE.
    *
-   * @private {goog.structs.Map<string, !Array<*>>}
+   * @private {?goog.structs.Map<string, !Array<*>>}
    */
   this.keyMap_ = null;
 
