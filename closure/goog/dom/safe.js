@@ -729,3 +729,43 @@ goog.dom.safe.openInWindow = function(
       opt_name ? goog.string.Const.unwrap(opt_name) : '', opt_specs,
       opt_replace);
 };
+
+
+/**
+ * Parses the HTML as 'text/html'.
+ * @param {!DOMParser} parser
+ * @param {!goog.html.SafeHtml} html The HTML to be parsed.
+ * @return {?Document}
+ */
+goog.dom.safe.parseFromStringHtml = function(parser, html) {
+  return parser.parseFromString(goog.html.SafeHtml.unwrap(html), 'text/html');
+};
+
+
+/**
+ * Safely creates an HTMLImageElement from a Blob.
+ *
+ * Example usage:
+ *     goog.dom.safe.createImageFromBlob(blob);
+ * which is a safe alternative to
+ *     image.src = createObjectUrl(blob)
+ * The latter can result in executing malicious same-origin scripts from a bad
+ * Blob.
+ * @param {!Blob} blob The blob to create the image from.
+ * @return {!HTMLImageElement} The image element created from the blob.
+ * @throws {!Error} If called with a Blob with a MIME type other than image/.*.
+ */
+goog.dom.safe.createImageFromBlob = function(blob) {
+  // Any image/* MIME type is accepted as safe.
+  if (!/^image\/.*/g.test(blob.type)) {
+    throw new Error(
+        'goog.dom.safe.createImageFromBlob only accepts MIME type image/.*.');
+  }
+  var objectUrl = window.URL.createObjectURL(blob);
+  var image = new Image();
+  image.onload = function() {
+    window.URL.revokeObjectURL(objectUrl);
+  };
+  image.src = objectUrl;
+  return image;
+};

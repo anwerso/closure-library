@@ -728,6 +728,55 @@ function testOpenInWindow() {
       'openInWindow should return the created window', fakeWindow, retVal);
 }
 
+function testParseFromStringHtml() {
+  if (goog.userAgent.IE && !goog.userAgent.isVersionOrHigher('10')) {
+    return;
+  }
+  var html = goog.html.SafeHtml.create('A', {'class': 'b'}, 'c');
+  var node =
+      goog.dom.safe.parseFromStringHtml(new DOMParser(), html).body.firstChild;
+  assertEquals('A', node.tagName);
+  assertEquals('b', node.className);
+  assertEquals('c', node.textContent);
+}
+
+function testCreateImageFromBlob() {
+  // Skip unsupported test if IE9 or lower.
+  if (goog.userAgent.IE && !goog.userAgent.isVersionOrHigher('10')) {
+    return;
+  }
+  var blob = new Blob(['data'], {type: 'image/svg+xml'});
+  var fakeObjectUrl = 'blob:http://fakeurl.com';
+  var mockCreateObject = /** @type {?} */ (
+      goog.testing.createMethodMock(window.URL, 'createObjectURL'));
+  var mockRevokeObject = /** @type {?} */ (
+      goog.testing.createMethodMock(window.URL, 'revokeObjectURL'));
+  mockCreateObject(blob).$returns(fakeObjectUrl);
+  mockRevokeObject(fakeObjectUrl);
+  mockCreateObject.$replay();
+  mockRevokeObject.$replay();
+
+  var image = goog.dom.safe.createImageFromBlob(blob);
+
+  mockCreateObject.$verify();
+  assertEquals('function', typeof image.onload);
+  image.onload(null);  // Trigger image load.
+  mockRevokeObject.$verify();
+  assertEquals(fakeObjectUrl, image.src);
+  assertTrue(image instanceof HTMLImageElement);
+}
+
+function testCreateImageFromBlobBadMimeType() {
+  // Skip unsupported test if IE9 or lower.
+  if (goog.userAgent.IE && !goog.userAgent.isVersionOrHigher('10')) {
+    return;
+  }
+  var blob = new Blob(['data'], {type: 'badmimetype'});
+  assertThrows(function() {
+    goog.dom.safe.createImageFromBlob(blob);
+  });
+}
+
 /**
  * Tests that f raises an AssertionError and runs f while disabling assertion
  * errors.
