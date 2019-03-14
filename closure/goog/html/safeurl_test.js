@@ -21,13 +21,23 @@ goog.provide('goog.html.safeUrlTest');
 goog.require('goog.html.SafeUrl');
 goog.require('goog.html.TrustedResourceUrl');
 goog.require('goog.html.safeUrlTestVectors');
+goog.require('goog.html.trustedtypes');
 goog.require('goog.i18n.bidi.Dir');
 goog.require('goog.object');
 goog.require('goog.string.Const');
+goog.require('goog.testing.PropertyReplacer');
 goog.require('goog.testing.jsunit');
 goog.require('goog.userAgent');
 
 goog.setTestOnly('goog.html.safeUrlTest');
+
+
+var stubs = new goog.testing.PropertyReplacer();
+var policy = goog.createTrustedTypesPolicy('closure_test');
+
+function tearDown() {
+  stubs.reset();
+}
 
 
 function testSafeUrl() {
@@ -106,6 +116,16 @@ function testSafeUrlSanitize_sanitizeTelUrl() {
     var v = vectors[i];
     var observed = goog.html.SafeUrl.fromTelUrl(v.input);
     assertEquals(v.expected, goog.html.SafeUrl.unwrap(observed));
+  }
+}
+
+function testSafeUrlSanitize_sanitizeSshUrl() {
+  var vectors = goog.html.safeUrlTestVectors.SSH_VECTORS;
+  for (var i = 0; i < vectors.length; ++i) {
+    var v = vectors[i];
+    var observed = goog.html.SafeUrl.fromSshUrl(v.input);
+    assertEquals(
+        'SSH Url: ' + v.input, v.expected, goog.html.SafeUrl.unwrap(observed));
   }
 }
 
@@ -266,24 +286,37 @@ function testUnwrap() {
 }
 
 
+function testUnwrapTrustedURL() {
+  var safeValue = goog.html.SafeUrl.sanitize('https://example.com/');
+  var trustedValue = goog.html.SafeUrl.unwrapTrustedURL(safeValue);
+  assertEquals(safeValue.getTypedStringValue(), trustedValue);
+  stubs.set(
+      goog.html.trustedtypes, 'PRIVATE_DO_NOT_ACCESS_OR_ELSE_POLICY', policy);
+  safeValue = goog.html.SafeUrl.sanitize('https://example.com/');
+  trustedValue = goog.html.SafeUrl.unwrapTrustedURL(safeValue);
+  assertEquals(safeValue.getTypedStringValue(), trustedValue.toString());
+  assertTrue(
+      goog.global.TrustedURL ? trustedValue instanceof TrustedURL :
+                               goog.isString(trustedValue));
+}
+
+
 function testSafeUrlSanitize_sanitizeUrl() {
   var vectors = goog.html.safeUrlTestVectors.BASE_VECTORS;
   for (var i = 0; i < vectors.length; ++i) {
     var v = vectors[i];
-    if (v.input.match(/^data:/i)) {
-      var observed = goog.html.SafeUrl.fromDataUrl(v.input);
-      assertEquals(v.expected, goog.html.SafeUrl.unwrap(observed));
+    var isDataUrl = v.input.match(/^data:/i);
+    var observed = isDataUrl ? goog.html.SafeUrl.fromDataUrl(v.input) :
+                               goog.html.SafeUrl.sanitize(v.input);
+    assertEquals(v.expected, goog.html.SafeUrl.unwrap(observed));
+    if (v.safe) {
+      var asserted =
+          goog.html.SafeUrl.sanitizeAssertUnchanged(v.input, isDataUrl);
+      assertEquals(v.expected, goog.html.SafeUrl.unwrap(asserted));
     } else {
-      var observed = goog.html.SafeUrl.sanitize(v.input);
-      assertEquals(v.expected, goog.html.SafeUrl.unwrap(observed));
-      if (v.safe) {
-        var asserted = goog.html.SafeUrl.sanitizeAssertUnchanged(v.input);
-        assertEquals(v.expected, goog.html.SafeUrl.unwrap(asserted));
-      } else {
-        assertThrows(function() {
-          goog.html.SafeUrl.sanitizeAssertUnchanged(v.input);
-        });
-      }
+      assertThrows(function() {
+        goog.html.SafeUrl.sanitizeAssertUnchanged(v.input, isDataUrl);
+      });
     }
   }
 }

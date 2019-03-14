@@ -30,13 +30,14 @@ goog.require('goog.html.SafeStyle');
 goog.require('goog.html.SafeStyleSheet');
 goog.require('goog.html.SafeUrl');
 goog.require('goog.html.TrustedResourceUrl');
+goog.require('goog.html.trustedtypes');
 goog.require('goog.i18n.bidi.Dir');
 goog.require('goog.i18n.bidi.DirectionalString');
 goog.require('goog.labs.userAgent.browser');
 goog.require('goog.object');
-goog.require('goog.string');
 goog.require('goog.string.Const');
 goog.require('goog.string.TypedString');
+goog.require('goog.string.internal');
 
 
 
@@ -84,7 +85,7 @@ goog.html.SafeHtml = function() {
    * The contained value of this SafeHtml.  The field has a purposely ugly
    * name to make (non-compiled) code that attempts to directly access this
    * field stand out.
-   * @private {string}
+   * @private {!TrustedHTML|string}
    */
   this.privateDoNotAccessOrElseSafeHtmlWrappedValue_ = '';
 
@@ -147,7 +148,7 @@ goog.html.SafeHtml.prototype.implementsGoogStringTypedString = true;
  * @override
  */
 goog.html.SafeHtml.prototype.getTypedStringValue = function() {
-  return this.privateDoNotAccessOrElseSafeHtmlWrappedValue_;
+  return this.privateDoNotAccessOrElseSafeHtmlWrappedValue_.toString();
 };
 
 
@@ -178,6 +179,17 @@ if (goog.DEBUG) {
  *     `goog.asserts.AssertionError`.
  */
 goog.html.SafeHtml.unwrap = function(safeHtml) {
+  return goog.html.SafeHtml.unwrapTrustedHTML(safeHtml).toString();
+};
+
+
+/**
+ * Unwraps value as TrustedHTML if supported or as a string if not.
+ * @param {!goog.html.SafeHtml} safeHtml
+ * @return {!TrustedHTML|string}
+ * @see goog.html.SafeHtml.unwrap
+ */
+goog.html.SafeHtml.unwrapTrustedHTML = function(safeHtml) {
   // Perform additional run-time type-checking to ensure that safeHtml is indeed
   // an instance of the expected type.  This provides some additional protection
   // against security bugs due to application code that disables type checks.
@@ -242,7 +254,7 @@ goog.html.SafeHtml.htmlEscape = function(textOrHtml) {
     textAsString = String(textOrHtml);
   }
   return goog.html.SafeHtml.createSafeHtmlSecurityPrivateDoNotAccessOrElse(
-      goog.string.htmlEscape(textAsString), dir);
+      goog.string.internal.htmlEscape(textAsString), dir);
 };
 
 
@@ -260,7 +272,7 @@ goog.html.SafeHtml.htmlEscapePreservingNewlines = function(textOrHtml) {
   }
   var html = goog.html.SafeHtml.htmlEscape(textOrHtml);
   return goog.html.SafeHtml.createSafeHtmlSecurityPrivateDoNotAccessOrElse(
-      goog.string.newLineToBr(goog.html.SafeHtml.unwrap(html)),
+      goog.string.internal.newLineToBr(goog.html.SafeHtml.unwrap(html)),
       html.getDirection());
 };
 
@@ -281,7 +293,7 @@ goog.html.SafeHtml.htmlEscapePreservingNewlinesAndSpaces = function(
   }
   var html = goog.html.SafeHtml.htmlEscape(textOrHtml);
   return goog.html.SafeHtml.createSafeHtmlSecurityPrivateDoNotAccessOrElse(
-      goog.string.whitespaceEscape(goog.html.SafeHtml.unwrap(html)),
+      goog.string.internal.whitespaceEscape(goog.html.SafeHtml.unwrap(html)),
       html.getDirection());
 };
 
@@ -664,7 +676,7 @@ goog.html.SafeHtml.createMetaRefresh = function(url, opt_secs) {
     // This is imperfect. Notice that both ' and ; are reserved characters in
     // URIs, so this could do the wrong thing, but at least it will do the wrong
     // thing in only rare cases.
-    if (goog.string.contains(unwrappedUrl, ';')) {
+    if (goog.string.internal.contains(unwrappedUrl, ';')) {
       unwrappedUrl = "'" + unwrappedUrl.replace(/'/g, '%27') + "'";
     }
   }
@@ -727,7 +739,7 @@ goog.html.SafeHtml.getAttrNameAndValue_ = function(tagName, name, value) {
       goog.isString(value) || goog.isNumber(value),
       'String or number value expected, got ' + (typeof value) +
           ' with value: ' + value);
-  return name + '="' + goog.string.htmlEscape(String(value)) + '"';
+  return name + '="' + goog.string.internal.htmlEscape(String(value)) + '"';
 };
 
 
@@ -858,7 +870,11 @@ goog.html.SafeHtml.createSafeHtmlSecurityPrivateDoNotAccessOrElse = function(
  */
 goog.html.SafeHtml.prototype.initSecurityPrivateDoNotAccessOrElse_ = function(
     html, dir) {
-  this.privateDoNotAccessOrElseSafeHtmlWrappedValue_ = html;
+  this.privateDoNotAccessOrElseSafeHtmlWrappedValue_ =
+      goog.html.trustedtypes.PRIVATE_DO_NOT_ACCESS_OR_ELSE_POLICY ?
+      goog.html.trustedtypes.PRIVATE_DO_NOT_ACCESS_OR_ELSE_POLICY.createHTML(
+          html) :
+      html;
   this.dir_ = dir;
   return this;
 };

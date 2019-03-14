@@ -108,9 +108,12 @@ SafeDomTreeProcessor.prototype.processToString = function(html) {
     newRoot.appendChild(newTree);
     newTree = newRoot;
   }
-
-  // Serialized string of the sanitized DOM without root span tag
-  return newTree.innerHTML;
+  // The XMLSerializer will add a spurious xmlns attribute to the root node.
+  var serializedNewTree = new XMLSerializer().serializeToString(newTree);
+  // Remove the outer span before returning the string representation of the
+  // processed copy.
+  return serializedNewTree.slice(
+      serializedNewTree.indexOf('>') + 1, serializedNewTree.lastIndexOf('</'));
 };
 
 /**
@@ -229,7 +232,7 @@ SafeDomTreeProcessor.prototype.createNode_ = function(originalNode) {
   var nodeType = noclobber.getNodeType(originalNode);
   switch (nodeType) {
     case NodeType.TEXT:
-      return this.createTextNode(originalNode);
+      return this.createTextNode(/** @type {!Text} */ (originalNode));
     case NodeType.ELEMENT:
       return this.createElement_(noclobber.assertNodeIsElement(originalNode));
     default:
@@ -241,8 +244,8 @@ SafeDomTreeProcessor.prototype.createNode_ = function(originalNode) {
 /**
  * Creates a new text node from the original text node, or null if the node
  * should not be copied over to the new tree.
- * @param {!Node} originalNode
- * @return {?Node}
+ * @param {!Text} originalNode
+ * @return {?Text}
  * @protected @abstract
  */
 SafeDomTreeProcessor.prototype.createTextNode = function(originalNode) {};

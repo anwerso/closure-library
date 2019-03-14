@@ -1,4 +1,4 @@
-// Copyright 2014 The Closure Library Authors. All Rights Reserved.
+// Copyright 2018 The Closure Library Authors. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,13 +13,14 @@
 // limitations under the License.
 
 /**
- * @fileoverview Legacy alias to goog.labs.collections.iterables.
+ * @fileoverview Policy to convert strings to Trusted Types. See
+ * https://github.com/WICG/trusted-types for details.
  */
 
-// TODO(b/122751175): Remove this alias when usages have been migrated.
+goog.provide('goog.html.trustedtypes');
 
-goog.module('goog.labs.iterable');
-
-const iterables = goog.require('goog.labs.collections.iterables');
-
-exports = iterables;
+/** @package @const {?TrustedTypePolicy} */
+goog.html.trustedtypes.PRIVATE_DO_NOT_ACCESS_OR_ELSE_POLICY =
+    goog.TRUSTED_TYPES_POLICY_NAME ?
+    goog.createTrustedTypesPolicy(goog.TRUSTED_TYPES_POLICY_NAME + '#html') :
+    null;
