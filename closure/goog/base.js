@@ -42,11 +42,26 @@ var COMPILED = false;
 var goog = goog || {};
 
 /**
- * Reference to the global context.  In most cases this will be 'window'.
+ * Reference to the global object.
+ * https://www.ecma-international.org/ecma-262/9.0/index.html#sec-global-object
+ *
+ * More info on this implementation here:
+ * https://docs.google.com/document/d/1NAeW4Wk7I7FV0Y2tcUFvQdGMc89k2vdgSXInw8_nvCI/edit
+ *
  * @const
- * @suppress {newCheckTypes}
+ * @suppress {undefinedVars} self won't be referenced unless `this` is falsy.
+ * @type {!Global}
  */
-goog.global = this;
+goog.global =
+    // Check `this` first for backwards compatibility.
+    // Valid unless running as an ES module or in a function wrapper called
+    //   without setting `this` properly.
+    // Note that base.js can't usefully be imported as an ES module, but it may
+    // be compiled into bundles that are loadable as ES modules.
+    this ||
+    // https://developer.mozilla.org/en-US/docs/Web/API/Window/self
+    // For in-page browser environments and workers.
+    self;
 
 
 /**
@@ -172,11 +187,13 @@ goog.exportPath_ = function(name, opt_object, opt_objectToExportTo) {
  * has the property specified, and otherwise used the defined defaultValue.
  * When compiled the default can be overridden using the compiler options or the
  * value set in the CLOSURE_DEFINES object. Returns the defined value so that it
- * can be used safely in modules.
+ * can be used safely in modules. Note that the value type MUST be either
+ * boolean, number, or string.
  *
  * @param {string} name The distinguished name to provide.
- * @param {string|number|boolean} defaultValue
- * @return {string|number|boolean} The defined value.
+ * @param {T} defaultValue
+ * @return {T} The defined value.
+ * @template T
  */
 goog.define = function(name, defaultValue) {
   var value = defaultValue;
@@ -196,9 +213,36 @@ goog.define = function(name, defaultValue) {
       value = defines[name];
     }
   }
-  goog.exportPath_(name, value);
   return value;
 };
+
+
+/**
+ * @define {number} Integer year indicating the set of browser features that are
+ * guaranteed to be present.  This is defined to include exactly features that
+ * work correctly on all "modern" browsers that are stable on January 1 of the
+ * specified year.  For example,
+ * ```js
+ * if (goog.FEATURESET_YEAR >= 2019) {
+ *   // use APIs known to be available on all major stable browsers Jan 1, 2019
+ * } else {
+ *   // polyfill for older browsers
+ * }
+ * ```
+ * This is intended to be the primary define for removing
+ * unnecessary browser compatibility code (such as ponyfills and workarounds),
+ * and should inform the default value for most other defines:
+ * ```js
+ * const ASSUME_NATIVE_PROMISE =
+ *     goog.define('ASSUME_NATIVE_PROMISE', goog.FEATURESET_YEAR >= 2016);
+ * ```
+ *
+ * The default assumption is that IE9 is the lowest supported browser, which was
+ * first available Jan 1, 2012.
+ *
+ * TODO(user): Reference more thorough documentation when it's available.
+ */
+goog.FEATURESET_YEAR = goog.define('goog.FEATURESET_YEAR', 2012);
 
 
 /**
@@ -637,16 +681,6 @@ goog.declareModuleId = function(namespace) {
     };
   }
 };
-
-
-/**
- * Deprecated old name for goog.declareModuleId. This function is being renamed
- * to help disambiguate with goog.module.declareLegacyNamespace.
- *
- * @type {function(string): undefined}
- * @suppress {missingProvide}
- */
-goog.module.declareNamespace = goog.declareModuleId;
 
 
 /**
@@ -1275,7 +1309,7 @@ goog.transpile_ = function(code, path, target) {
       // so a normal script-tag load will be too slow. Wrapped in a function
       // so that code is eval'd in the global scope.
       (function() {
-        eval(transpilerCode + '\n//# sourceURL=' + transpilerPath);
+        (0, eval)(transpilerCode + '\n//# sourceURL=' + transpilerPath);
       }).call(goog.global);
       // Even though the transpiler is optional, if $gwtExport is found, it's
       // a sign the transpiler was loaded and the $jscomp.transpile *should*
@@ -2202,12 +2236,12 @@ goog.base = function(me, opt_methodName, var_args) {
     args[i - 2] = arguments[i];
   }
   var foundCaller = false;
-  for (var ctor = me.constructor; ctor;
-       ctor = ctor.superClass_ && ctor.superClass_.constructor) {
-    if (ctor.prototype[opt_methodName] === caller) {
+  for (var proto = me.constructor.prototype; proto;
+       proto = Object.getPrototypeOf(proto)) {
+    if (proto[opt_methodName] === caller) {
       foundCaller = true;
     } else if (foundCaller) {
-      return ctor.prototype[opt_methodName].apply(me, args);
+      return proto[opt_methodName].apply(me, args);
     }
   }
 
@@ -2628,13 +2662,6 @@ if (!COMPILED && goog.DEPENDENCIES_ENABLED) {
           '==3}';
 
       return evalCheck('(()=>{"use strict";' + es6fullTest + '})()');
-    });
-    // TODO(joeltine): Remove es6-impl references for b/31340605.
-    // Consider es6-impl (widely-implemented es6 features) to be supported
-    // whenever es6 is supported. Technically es6-impl is a lower level of
-    // support than es6, but we don't have tests specifically for it.
-    addNewerLanguageTranspilationCheck('es6-impl', function() {
-      return true;
     });
     // ** and **= are the only new features in 'es7'
     addNewerLanguageTranspilationCheck('es7', function() {
@@ -4083,7 +4110,8 @@ if (!COMPILED && goog.DEPENDENCIES_ENABLED) {
  * @define {string} Trusted Types policy name. If non-empty then Closure will
  * use Trusted Types.
  */
-goog.define('goog.TRUSTED_TYPES_POLICY_NAME', '');
+goog.TRUSTED_TYPES_POLICY_NAME =
+    goog.define('goog.TRUSTED_TYPES_POLICY_NAME', '');
 
 
 /**
@@ -4105,18 +4133,28 @@ goog.identity_ = function(s) {
  * reference to the created policy should be visibility restricted.
  * @param {string} name
  * @return {?TrustedTypePolicy}
- * @throws {!TypeError} If called with a name which is already registered.
  */
 goog.createTrustedTypesPolicy = function(name) {
-  if (typeof TrustedTypes === 'undefined') {
-    return null;
+  var policy = null;
+  if (typeof TrustedTypes === 'undefined' || !TrustedTypes.createPolicy) {
+    return policy;
   }
-  return TrustedTypes.createPolicy(name, {
-    createHTML: goog.identity_,
-    createScript: goog.identity_,
-    createScriptURL: goog.identity_,
-    createURL: goog.identity_
-  });
+  // TrustedTypes.createPolicy throws if called with a name that is already
+  // registered, even in report-only mode. Until the API changes, catch the
+  // error not to break the applications functionally. In such case, the code
+  // will fall back to using regular Safe Types.
+  // TODO(koto): Remove catching once createPolicy API stops throwing.
+  try {
+    policy = TrustedTypes.createPolicy(name, {
+      createHTML: goog.identity_,
+      createScript: goog.identity_,
+      createScriptURL: goog.identity_,
+      createURL: goog.identity_
+    });
+  } catch (e) {
+    goog.logToConsole_(e.message);
+  }
+  return policy;
 };
 
 

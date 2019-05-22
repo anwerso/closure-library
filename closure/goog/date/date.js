@@ -496,22 +496,16 @@ goog.date.setIso8601TimeOnly_ = function(d, formatted) {
     // Convert the date part into UTC. This is important because the local date
     // can differ from the UTC date, and the date part of an ISO 8601 string is
     // always set in terms of the local date.
-    var localYear = d.getYear();
-    var localMonth = d.getMonth();
-    var localDate = d.getDate();
-    d.setUTCFullYear(localYear);
-    d.setUTCMonth(localMonth);
-    d.setUTCDate(localDate);
+    var year = d.getYear();
+    var month = d.getMonth();
+    var day = d.getDate();
+    var hour = Number(timeParts[1]);
+    var minute = Number(timeParts[2]) || 0;
+    var second = Number(timeParts[3]) || 0;
+    var millisecond = timeParts[4] ? Number(timeParts[4]) * 1000 : 0;
+    var utc = Date.UTC(year, month, day, hour, minute, second, millisecond);
 
-    d.setUTCHours(Number(timeParts[1]));
-    d.setUTCMinutes(Number(timeParts[2]) || 0);
-    d.setUTCSeconds(Number(timeParts[3]) || 0);
-    d.setUTCMilliseconds(timeParts[4] ? Number(timeParts[4]) * 1000 : 0);
-
-    if (offsetMinutes != 0) {
-      // Adjust the date and time according to the specified timezone.
-      d.setTime(d.getTime() + offsetMinutes * 60000);
-    }
+    d.setTime(utc + offsetMinutes * 60000);
   } else {
     d.setHours(Number(timeParts[1]));
     d.setMinutes(Number(timeParts[2]) || 0);

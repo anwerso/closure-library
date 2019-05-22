@@ -162,21 +162,23 @@ goog.soy.Renderer.prototype.render = function(template, opt_templateData) {
  * of kinds other than "text".
  *
  * @param {
- *   ?function(ARG_TYPES, ?Object<string,*>=): ?goog.soy.data.UnsanitizedText|
- *   ?function(ARG_TYPES, ?Object=, ?Object<string, *>=):
- *       ?goog.soy.data.UnsanitizedText} template The Soy template to render.
+ *     ?function(ARG_TYPES, ?Object<string,*>=): ?goog.soy.TextType|
+ *     ?function(ARG_TYPES, null=, ?Object<string, *>=): ?goog.soy.TextType}
+ *     template The Soy template to render.
  * @param {ARG_TYPES=} opt_templateData The data for the template.
  * @return {string} The return value of rendering the template directly.
  * @template ARG_TYPES
  */
 goog.soy.Renderer.prototype.renderText = function(template, opt_templateData) {
   var result = template(opt_templateData || {}, this.getInjectedData_());
-  goog.asserts.assertInstanceof(
-      result, goog.soy.data.SanitizedContent,
-      'renderText cannot be called on a non-strict soy template');
-  goog.asserts.assert(
-      result.contentKind === goog.soy.data.SanitizedContentKind.TEXT,
-      'renderText was called with a template of kind other than "text"');
+  if (!goog.isString(result)) {
+    goog.asserts.assertInstanceof(
+        result, goog.soy.data.SanitizedContent,
+        'renderText cannot be called on a non-strict soy template');
+    goog.asserts.assert(
+        result.contentKind === goog.soy.data.SanitizedContentKind.TEXT,
+        'renderText was called with a template of kind other than "text"');
+  }
   this.handleRender();
   return String(result);
 };

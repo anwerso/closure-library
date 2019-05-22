@@ -57,6 +57,28 @@ function testSafeUrl() {
 }
 
 
+function testSafeUrlIsSafeMimeType_withSafeType() {
+  assertTrue(goog.html.SafeUrl.isSafeMimeType('audio/ogg'));
+  assertTrue(goog.html.SafeUrl.isSafeMimeType('image/png'));
+  assertTrue(goog.html.SafeUrl.isSafeMimeType('iMage/pNg'));
+  assertTrue(goog.html.SafeUrl.isSafeMimeType('video/mpeg'));
+  assertTrue(goog.html.SafeUrl.isSafeMimeType('video/ogg'));
+  assertTrue(goog.html.SafeUrl.isSafeMimeType('video/mp4'));
+  assertTrue(goog.html.SafeUrl.isSafeMimeType('video/ogg'));
+  assertTrue(goog.html.SafeUrl.isSafeMimeType('video/webm'));
+  assertTrue(goog.html.SafeUrl.isSafeMimeType('video/quicktime'));
+}
+
+
+function testSafeUrlIsSafeMimeType_withUnsafeType() {
+  assertFalse(goog.html.SafeUrl.isSafeMimeType(''));
+  assertFalse(goog.html.SafeUrl.isSafeMimeType('ximage/png'));
+  assertFalse(goog.html.SafeUrl.isSafeMimeType('image/pngx'));
+  assertFalse(goog.html.SafeUrl.isSafeMimeType('video/whatever'));
+  assertFalse(goog.html.SafeUrl.isSafeMimeType('video/'));
+}
+
+
 function testSafeUrlFromBlob_withSafeType() {
   if (isIE9OrLower()) {
     return;
@@ -70,6 +92,11 @@ function testSafeUrlFromBlob_withSafeType() {
   assertBlobTypeIsSafe('video/ogg', true);
   assertBlobTypeIsSafe('video/webm', true);
   assertBlobTypeIsSafe('video/quicktime', true);
+
+  assertBlobTypeIsSafe('image/png;foo=bar', true);
+  assertBlobTypeIsSafe('image/png;foo="bar"', true);
+  assertBlobTypeIsSafe('image/png;foo="bar;baz"', true);
+  assertBlobTypeIsSafe('image/png;foo="bar";baz=bar', true);
 }
 
 
@@ -82,6 +109,15 @@ function testSafeUrlFromBlob_withUnsafeType() {
   assertBlobTypeIsSafe('image/pngx', false);
   assertBlobTypeIsSafe('video/whatever', false);
   assertBlobTypeIsSafe('video/', false);
+
+  assertBlobTypeIsSafe('image/png;foo', false);
+  assertBlobTypeIsSafe('image/png;foo=', false);
+  assertBlobTypeIsSafe('image/png;foo=bar;', false);
+  assertBlobTypeIsSafe('image/png;foo=bar;baz', false);
+
+  // Maybe not wrong, but we reject nonetheless for simplicity.
+  assertBlobTypeIsSafe('image/png;foo=bar&', false);
+  assertBlobTypeIsSafe('image/png;foo=%3Cbar', false);
 }
 
 

@@ -19,15 +19,18 @@ const {execute} = require('../../bin/closuremakedeps');
 const path = require('path');
 const fs = require('fs');
 const jasmineDiff = require('jasmine-diff');
+const os = require('os');
 
 // This test isn't that slow unless you're debugging.
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;
 
-const CLOSURE_SUB_DIR = 'closure/goog';
-
-// The entry point of the module is bootstrap/nodejs.js. Need to back out.
+// By default assume this is running based on the structure of the git repo.
+// closure_deps/ lives in the save repo as Closure, and the library's code is in
+// closure/goog and third_party/closure/goog.
+const CLOSURE_SUB_DIR = process.env.CLOSURE_SUB_DIR || 'closure/goog';
 const CLOSURE_LIBRARY_PATH =
-    path.resolve(require.resolve('google-closure-library'), '../../../../');
+    process.env.CLOSURE_LIBRARY_PATH || path.resolve(__dirname, '../../../');
+
 const CLOSURE_PATH = path.resolve(CLOSURE_LIBRARY_PATH, CLOSURE_SUB_DIR);
 const THIRD_PARTY_PATH =
     path.resolve(CLOSURE_LIBRARY_PATH, 'third_party', CLOSURE_SUB_DIR);
@@ -62,6 +65,14 @@ function skipTests(line) {
 }
 
 describe('closure-make-deps', function() {
+  const tempFile = path.join(os.tmpdir(), 'closuremakejsdepstmp.js');
+  const tempFileRelativePath = path.relative(CLOSURE_PATH, tempFile);
+
+  const closureDepsContents =
+      fs.readFileSync(path.resolve(CLOSURE_PATH, 'deps.js'), {
+          encoding: 'utf8'
+        }).replace(/^(\/\/.*)?\n/gm, '');
+
   beforeEach(function() {
     jasmine.addMatchers(jasmineDiff(jasmine, {
       colors: false,
@@ -69,14 +80,17 @@ describe('closure-make-deps', function() {
     }));
   });
 
+  afterEach(() => {
+    if (fs.existsSync(tempFile)) {
+      fs.unlinkSync(tempFile);
+    }
+  });
+
   it('produces closure library deps file', async function() {
-    const expectedContents =
-        fs.readFileSync(path.resolve(CLOSURE_PATH, 'deps.js'), {
-            encoding: 'utf8'
-          }).replace(/^(\/\/.*)?\n/gm, '');
     const flags = [
       ...flag('--root', CLOSURE_PATH),
       ...flag('--root', THIRD_PARTY_PATH),
+      ...exclude('deps.js'),
       ...exclude('transpile.js'),
       ...exclude('testing/testdata'),
       ...exclude('bin'),
@@ -88,6 +102,7 @@ describe('closure-make-deps', function() {
       ...exclude('debug_loader_integration_tests'),
       ...exclude('base_debug_loader_test.js'),
     ];
+
     const result = await execute(flags);
     expect(result.errors.filter(e => e.fatal).map(e => e.toString()))
         .toEqual([]);
@@ -95,9 +110,78 @@ describe('closure-make-deps', function() {
     let resultLines = result.text.split('\n');
     resultLines = resultLines.filter(skipTests);
 
-    let expectedLines = expectedContents.split('\n');
+    let expectedLines = closureDepsContents.split('\n');
     expectedLines = expectedLines.filter(skipTests);
 
     expect(resultLines).toEqual(expectedLines);
+  });
+
+  it('merge only deps produces same file', async function() {
+    const flags = [
+      ...flag('--merge-deps', 'true'),
+      ...flag('--closure-path', CLOSURE_PATH),
+      ...flag('-f', path.join(CLOSURE_PATH, 'deps.js')),
+    ];
+
+    const result = await execute(flags);
+    expect(result.errors).toEqual([]);
+    expect(result.text).toEqual(closureDepsContents);
+  });
+
+  it('input deps file forward declares symbols', async function() {
+    fs.writeFileSync(
+        tempFile, `goog.module('ex');\ngoog.require('goog.array');`);
+
+    const flags = [
+      ...flag('--closure-path', CLOSURE_PATH),
+      ...flag('-f', path.join(CLOSURE_PATH, 'deps.js')),
+      ...flag('-f', tempFile)
+    ];
+
+    const result = await execute(flags);
+    expect(result.errors).toEqual([]);
+    expect(result.text)
+        .toEqual(
+            `goog.addDependency('${tempFileRelativePath}'` +
+            `, ['ex'], ['goog.array'], {'module': 'goog'});\n`);
+  });
+
+  it('missing require is error', async function() {
+    fs.writeFileSync(tempFile, `goog.require('goog.array');`);
+
+    const flags = [
+      ...flag('--closure-path', CLOSURE_PATH),
+      ...flag('-f', tempFile)
+    ];
+
+    try {
+      await execute(flags);
+      fail();
+    } catch (error) {
+      expect(error.toString())
+          .toEqual(
+              `Error: Error in source file "${tempFile}": ` +
+              `Could not find "goog.array".`);
+    }
+  });
+
+  it('merge deps and input file', async function() {
+    fs.writeFileSync(tempFile, `goog.module('a.b');`);
+
+    const expectedExtraFileLine = `goog.addDependency('${
+        tempFileRelativePath}', ['a.b'], [], {'module': 'goog'});\n`;
+
+    const expectedContents = expectedExtraFileLine + closureDepsContents;
+
+    const flags = [
+      ...flag('--merge-deps', 'true'),
+      ...flag('--closure-path', CLOSURE_PATH),
+      ...flag('-f', tempFile),
+      ...flag('-f', path.join(CLOSURE_PATH, 'deps.js')),
+    ];
+
+    const result = await execute(flags);
+    expect(result.errors).toEqual([]);
+    expect(result.text).toEqual(expectedContents);
   });
 });
