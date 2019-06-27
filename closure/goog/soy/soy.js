@@ -24,43 +24,51 @@ goog.require('goog.dom');
 goog.require('goog.dom.NodeType');
 goog.require('goog.dom.TagName');
 goog.require('goog.dom.safe');
-goog.require('goog.html.uncheckedconversions');
+goog.require('goog.html.SafeHtml');
 goog.require('goog.soy.data.SanitizedContent');
-goog.require('goog.soy.data.SanitizedContentKind');
-goog.require('goog.string');
 
+/**
+ * A structural interface for injected data.
+ *
+ * <p>Soy generated code contributes optional properties.
+ *
+ * @record
+ */
+goog.soy.IjData = function() {};
 
+/**
+ * Helper typedef for ij parameters.  This is what soy generates.
+ * @private
+ * @typedef {!goog.soy.IjData|!Object<string, *>}
+ */
+goog.soy.CompatibleIj_;
+
+// TODO(b/36644846): remove the second half of the function type union
 /**
  * Type definition for strict Soy templates. Very useful when passing a template
  * as an argument.
- * @typedef {function(?, ?Object<string, *>=): !goog.soy.data.SanitizedContent|
- *     function(?, null=, ?Object<string, *>=): !goog.soy.data.SanitizedContent}
+ * @typedef {function(?, ?goog.soy.CompatibleIj_=):
+ * !goog.soy.data.SanitizedContent| function(?, null=, ?Object<string, *>=):
+ * !goog.soy.data.SanitizedContent}
  */
 goog.soy.StrictTemplate;
 
-
+// TODO(b/36644846): remove the second half of the function type union
 /**
  * Type definition for strict Soy HTML templates. Very useful when passing
  * a template as an argument.
- * @typedef {function(?, ?Object<string, *>=): !goog.soy.data.SanitizedHtml|
- *     function(?, null=, ?Object<string, *>=): !goog.soy.data.SanitizedHtml}
+ * @typedef {function(?, ?goog.soy.CompatibleIj_=):
+ * !goog.soy.data.SanitizedHtml| function(?, null=, ?Object<string, *>=):
+ * !goog.soy.data.SanitizedHtml}
  */
 goog.soy.StrictHtmlTemplate;
 
 
 /**
  * Type definition for text templates.
- * @typedef {function(?, ?Object<string, *>=): !goog.soy.TextType|
- *     function(?, null=, ?Object<string, *>=): !goog.soy.TextType}
+ * @typedef {function(?=, ?goog.soy.CompatibleIj_=):string}
  */
 goog.soy.TextTemplate;
-
-
-/**
- * Text templates return value.
- * @typedef {string|!goog.soy.data.UnsanitizedText}
- */
-goog.soy.TextType;
 
 
 /**
@@ -77,13 +85,11 @@ goog.soy.TextType;
 goog.soy.renderHtml = function(element, templateResult) {
   goog.dom.safe.unsafeSetInnerHtmlDoNotUseOrElse(
       goog.asserts.assert(element),
-      goog.html.uncheckedconversions
-          .safeHtmlFromStringKnownToSatisfyTypeContract(
-              goog.string.Const.from('Soy HTML template.'),
-              goog.soy.ensureTemplateOutputHtml_(templateResult)));
+      goog.soy.ensureTemplateOutputHtml_(templateResult));
 };
 
 
+// TODO(b/36644846): remove the second half of the function type union
 /**
  * Renders a Soy template and then set the output string as
  * the innerHTML of an element. It is recommended to use this helper function
@@ -91,7 +97,7 @@ goog.soy.renderHtml = function(element, templateResult) {
  * will be easier to audit the code for cross-site scripting vulnerabilities.
  *
  * @param {Element} element The element whose content we are rendering into.
- * @param {?function(ARG_TYPES, Object<string, *>=):*|
+ * @param {?function(ARG_TYPES, ?goog.soy.CompatibleIj_=):*|
  *     ?function(ARG_TYPES, null=, Object<string, *>=):*} template
  *     The Soy template defining the element's content.
  * @param {ARG_TYPES=} opt_templateData The data for the template.
@@ -106,13 +112,10 @@ goog.soy.renderElement = function(
       opt_templateData || goog.soy.defaultTemplateData_, undefined,
       opt_injectedData));
   goog.dom.safe.unsafeSetInnerHtmlDoNotUseOrElse(
-      goog.asserts.assert(element),
-      goog.html.uncheckedconversions
-          .safeHtmlFromStringKnownToSatisfyTypeContract(
-              goog.string.Const.from('Soy HTML template.'), html));
+      goog.asserts.assert(element), html);
 };
 
-
+// TODO(b/36644846): remove the second half of the function type union
 /**
  * Renders a Soy template into a single node or a document
  * fragment. If the rendered HTML string represents a single node, then that
@@ -121,7 +124,8 @@ goog.soy.renderElement = function(
  * rendered nodes.
  *
  * @param {
- *     ?function(ARG_TYPES, Object<string, *>=):goog.soy.data.SanitizedContent|
+ *     ?function(ARG_TYPES,
+ * ?goog.soy.CompatibleIj_=):!goog.soy.data.SanitizedContent|
  *     ?function(ARG_TYPES, null=, Object<string, *>=):
  *     goog.soy.data.SanitizedContent} template The Soy template defining the
  *     element's content. The kind of the template must be "html" or "text".
@@ -141,18 +145,17 @@ goog.soy.renderAsFragment = function(
       opt_templateData || goog.soy.defaultTemplateData_, undefined,
       opt_injectedData);
   var html = goog.soy.ensureTemplateOutputHtml_(output);
-  goog.soy.assertFirstTagValid_(html);
-  var safeHtml = output.toSafeHtml();
-  return dom.safeHtmlToNode(safeHtml);
+  goog.soy.assertFirstTagValid_(html.getTypedStringValue());
+  return dom.safeHtmlToNode(html);
 };
 
-
+// TODO(b/36644846): remove the second half of the function type union
 /**
  * Renders a Soy template into a single node. If the rendered
  * HTML string represents a single node, then that node is returned. Otherwise,
  * a DIV element is returned containing the rendered nodes.
  *
- * @param {?function(ARG_TYPES, Object<string, *>=):*|
+ * @param {?function(ARG_TYPES, ?goog.soy.CompatibleIj_=):*|
  *     ?function(ARG_TYPES, null=, Object<string, *>=):*} template
  *     The Soy template defining the element's content.
  * @param {ARG_TYPES=} opt_templateData The data for the template.
@@ -206,12 +209,8 @@ goog.soy.convertToElement_ = function(templateResult, opt_domHelper) {
   var dom = opt_domHelper || goog.dom.getDomHelper();
   var wrapper = dom.createElement(goog.dom.TagName.DIV);
   var html = goog.soy.ensureTemplateOutputHtml_(templateResult);
-  goog.soy.assertFirstTagValid_(html);
-  goog.dom.safe.unsafeSetInnerHtmlDoNotUseOrElse(
-      wrapper,
-      goog.html.uncheckedconversions
-          .safeHtmlFromStringKnownToSatisfyTypeContract(
-              goog.string.Const.from('Soy HTML template.'), html));
+  goog.soy.assertFirstTagValid_(html.getTypedStringValue());
+  goog.dom.safe.unsafeSetInnerHtmlDoNotUseOrElse(wrapper, html);
 
   // If the template renders as a single element, return it.
   if (wrapper.childNodes.length == 1) {
@@ -234,7 +233,7 @@ goog.soy.convertToElement_ = function(templateResult, opt_domHelper) {
  * escaped.
  *
  * @param {*} templateResult The template result.
- * @return {string} The assumed-safe HTML output string.
+ * @return {!goog.html.SafeHtml} The assumed-safe HTML output string.
  * @private
  */
 goog.soy.ensureTemplateOutputHtml_ = function(templateResult) {
@@ -243,28 +242,19 @@ goog.soy.ensureTemplateOutputHtml_ = function(templateResult) {
   // non-escaped argument, plus some unit tests spoof templates.
   // TODO(gboyer): Track down and fix these cases.
   if (!goog.isObject(templateResult)) {
-    return goog.string.htmlEscape(String(templateResult));
+    return goog.html.SafeHtml.htmlEscape(String(templateResult));
   }
 
   // Allow SanitizedContent of kind HTML.
   if (templateResult instanceof goog.soy.data.SanitizedContent) {
-    var ContentKind = goog.soy.data.SanitizedContentKind;
-    if (templateResult.contentKind === ContentKind.HTML) {
-      return goog.asserts.assertString(templateResult.getContent());
-    }
-    if (templateResult.contentKind === ContentKind.TEXT) {
-      // Allow text to be rendered, as long as we escape it. Other content
-      // kinds will fail, since we don't know what to do with them.
-      // TODO(gboyer): Perhaps also include URI in this case.
-      return goog.string.htmlEscape(templateResult.getContent());
-    }
+    return templateResult.toSafeHtml();
   }
 
   goog.asserts.fail(
       'Soy template output is unsafe for use as HTML: ' + templateResult);
 
   // In production, return a safe string, rather than failing hard.
-  return 'zSoyz';
+  return goog.html.SafeHtml.htmlEscape('zSoyz');
 };
 
 

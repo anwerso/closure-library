@@ -789,8 +789,8 @@ goog.dom.getWindow_ = function(doc) {
  * createDom(goog.dom.TagName.P));</code> would return a div with two child
  * paragraphs
  *
- * For passing properties, please see {@link goog.dom.setProperties} for more
- * information.
+ * This function uses {@link goog.dom.setProperties} to set attributes: the
+ * `opt_attributes` parameter follows the same rules.
  *
  * @param {string|!goog.dom.TagName<T>} tagName Tag to create.
  * @param {?Object|?Array<string>|string=} opt_attributes If object, then a map
@@ -1803,7 +1803,7 @@ goog.dom.setTextContent = function(node, text) {
 
 
 /**
- * Gets the outerHTML of a node, which islike innerHTML, except that it
+ * Gets the outerHTML of a node, which is like innerHTML, except that it
  * actually contains the HTML of the node itself.
  * @param {Element} element The element to get the HTML of.
  * @return {string} The outerHTML of the given element.
