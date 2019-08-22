@@ -1023,9 +1023,7 @@ Driver.prototype.isTransportTestable_ = function() {
       testable = canAccessSameDomainIframe;
       break;
     case goog.net.xpc.TransportTypes.NATIVE_MESSAGING:
-    case goog.net.xpc.TransportTypes.FLASH:
     case goog.net.xpc.TransportTypes.DIRECT:
-    case goog.net.xpc.TransportTypes.NIX:
       testable = true;
       break;
   }

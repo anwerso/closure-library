@@ -45,9 +45,10 @@ goog.dom.BrowserFeature.ASSUME_OFFSCREEN_CANVAS =
  * @private
  */
 goog.dom.BrowserFeature.detectOffscreenCanvas_ = function(contextName) {
+  // This code only gets removed because we forced @nosideeffects on
+  // the functions. See: b/138802376
   try {
-    new self.OffscreenCanvas(0, 0).getContext(contextName);
-    return true;
+    return Boolean(new self.OffscreenCanvas(0, 0).getContext(contextName));
   } catch (ex) {
   }
   return false;
@@ -61,15 +62,6 @@ goog.dom.BrowserFeature.OFFSCREEN_CANVAS_2D =
     !goog.dom.BrowserFeature.ASSUME_NO_OFFSCREEN_CANVAS &&
     (goog.dom.BrowserFeature.ASSUME_OFFSCREEN_CANVAS ||
      goog.dom.BrowserFeature.detectOffscreenCanvas_('2d'));
-
-/**
- * Whether the browser supports OffscreenCanvas WebGL context.
- * @const {boolean}
- */
-goog.dom.BrowserFeature.OFFSCREEN_CANVAS_WEBGL =
-    !goog.dom.BrowserFeature.ASSUME_NO_OFFSCREEN_CANVAS &&
-    (goog.dom.BrowserFeature.ASSUME_OFFSCREEN_CANVAS ||
-     goog.dom.BrowserFeature.detectOffscreenCanvas_('webgl'));
 
 /**
  * Whether attributes 'name' and 'type' can be added to an element after it's

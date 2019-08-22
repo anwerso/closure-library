@@ -988,6 +988,9 @@ goog.nullFunction = function() {};
  *
  * @type {!Function}
  * @throws {Error} when invoked to indicate the method should be overridden.
+ * @deprecated Use "@abstract" annotation instead of goog.abstractMethod in new
+ *     code. See
+ *     https://github.com/google/closure-compiler/wiki/@abstract-classes-and-methods
  */
 goog.abstractMethod = function() {
   throw new Error('unimplemented abstract method');
@@ -4147,7 +4150,9 @@ goog.identity_ = function(s) {
  */
 goog.createTrustedTypesPolicy = function(name) {
   var policy = null;
-  if (typeof TrustedTypes === 'undefined' || !TrustedTypes.createPolicy) {
+  // TODO(koto): Remove window.TrustedTypes variant when the newer API ships.
+  var policyFactory = goog.global.trustedTypes || goog.global.TrustedTypes;
+  if (!policyFactory || !policyFactory.createPolicy) {
     return policy;
   }
   // TrustedTypes.createPolicy throws if called with a name that is already
@@ -4156,7 +4161,7 @@ goog.createTrustedTypesPolicy = function(name) {
   // will fall back to using regular Safe Types.
   // TODO(koto): Remove catching once createPolicy API stops throwing.
   try {
-    policy = TrustedTypes.createPolicy(name, {
+    policy = policyFactory.createPolicy(name, {
       createHTML: goog.identity_,
       createScript: goog.identity_,
       createScriptURL: goog.identity_,
@@ -4164,6 +4169,21 @@ goog.createTrustedTypesPolicy = function(name) {
     });
   } catch (e) {
     goog.logToConsole_(e.message);
+  }
+
+  // TrustedTypes API will deprecate TrustedURLs in Chrome 78. To prepare for
+  // that, and make the Closure code emulate the post-deprecation behavior
+  // of the API, we attempt to create a default policy that blesses any value
+  // to TrustedURL. This is a best-effort attempt. If that does not succeed,
+  // the application fails close - TrustedURL values will simply be required
+  // at all relevant sinks.
+  if (goog.global.TrustedURL && policyFactory.getPolicyNames &&
+      policyFactory.getPolicyNames().indexOf('default') === -1) {
+    try {
+      policyFactory.createPolicy('default', {createURL: goog.identity_}, true);
+    } catch (e) {
+      goog.logToConsole_(e.message);
+    }
   }
   return policy;
 };
