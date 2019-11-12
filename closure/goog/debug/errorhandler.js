@@ -14,7 +14,6 @@
 
 /**
  * @fileoverview Error handling utilities.
- *
  */
 
 goog.provide('goog.debug.ErrorHandler');
@@ -204,7 +203,7 @@ goog.debug.ErrorHandler.prototype.handleError_ = function(e) {
   // Don't re-report errors that have already been handled by this code.
   var MESSAGE_PREFIX =
       goog.debug.ErrorHandler.ProtectedFunctionError.MESSAGE_PREFIX;
-  if ((e && typeof e === 'object' && e.message &&
+  if ((e && typeof e === 'object' && typeof e.message === 'string' &&
        e.message.indexOf(MESSAGE_PREFIX) == 0) ||
       (typeof e === 'string' && e.indexOf(MESSAGE_PREFIX) == 0)) {
     return;
@@ -213,8 +212,8 @@ goog.debug.ErrorHandler.prototype.handleError_ = function(e) {
   if (!this.wrapErrors_) {
     // Add the prefix to the existing message.
     if (this.prefixErrorMessages_) {
-      if (typeof e === 'object' && e && 'message' in e) {
-        e.message = MESSAGE_PREFIX + e.message;
+      if (typeof e === 'object' && e && typeof e.message === 'string') {
+        /** @type {{message}} */ (e).message = MESSAGE_PREFIX + e.message;
       } else {
         e = MESSAGE_PREFIX + e;
       }
@@ -226,7 +225,8 @@ goog.debug.ErrorHandler.prototype.handleError_ = function(e) {
       // stack trace
       // If it has a stack and Error.captureStackTrace is supported (only
       // supported in V8 as of May 2013) log the stack to the console.
-      if (e && e.stack && Error.captureStackTrace && goog.global['console']) {
+      if (e && typeof e.stack === 'string' && Error.captureStackTrace &&
+          goog.global['console']) {
         goog.global['console']['error'](e.message, e.stack);
       }
     }
@@ -309,7 +309,7 @@ goog.debug.ErrorHandler.prototype.protectWindowFunctionsHelper_ = function(
   win[fnName] = function(fn, time) {
     // Don't try to protect strings. In theory, we could try to globalEval
     // the string, but this seems to lead to permission errors on IE6.
-    if (goog.isString(fn)) {
+    if (typeof fn === 'string') {
       fn = goog.partial(goog.globalEval, fn);
     }
     arguments[0] = fn = that.protectEntryPoint(fn);
@@ -391,7 +391,7 @@ goog.debug.ErrorHandler.ProtectedFunctionError = function(cause) {
 
   /** @suppress {missingProperties} stack may not be defined. */
   var stack = cause && cause.stack;
-  if (stack && goog.isString(stack)) {
+  if (stack && typeof stack === 'string') {
     this.stack = /** @type {string} */ (stack);
   }
 };

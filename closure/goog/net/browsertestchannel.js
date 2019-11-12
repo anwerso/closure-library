@@ -19,7 +19,6 @@
  * behind a buffering proxy. It also runs the logic to see if the channel
  * has been blocked by a network administrator. This class is part of the
  * BrowserChannel implementation and is not for use by normal application code.
- *
  */
 
 
@@ -188,7 +187,7 @@ goog.net.BrowserTestChannel.State_ = {
    * The  state for the BrowserTestChannel state machine where we're checking to
    * se if we're behind a buffering proxy.
    */
-  CONNECTION_TESTING: 2
+  CONNECTION_TESTING: 2,
 };
 
 
@@ -264,7 +263,7 @@ goog.net.BrowserTestChannel.prototype.connect = function(path) {
 
   // If the channel already has the result of the first test, then skip it.
   var firstTestResults = this.channel_.getFirstTestResults();
-  if (goog.isDefAndNotNull(firstTestResults)) {
+  if (firstTestResults != null) {
     this.hostPrefix_ = this.channel_.correctHostPrefix(firstTestResults[0]);
     this.blockedPrefix_ = firstTestResults[1];
     if (this.blockedPrefix_) {
@@ -353,7 +352,7 @@ goog.net.BrowserTestChannel.prototype.connectStage2_ = function() {
 
   // If the second test results are available, skip its execution.
   var secondTestResults = this.channel_.getSecondTestResults();
-  if (goog.isDefAndNotNull(secondTestResults)) {
+  if (secondTestResults != null) {
     this.channelDebug_.debug(
         'TestConnection: skipping stage 2, precomputed result is ' +
                 secondTestResults ?

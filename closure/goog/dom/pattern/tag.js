@@ -14,8 +14,6 @@
 
 /**
  * @fileoverview DOM pattern to match a tag.
- *
- * @author robbyw@google.com (Robby Walker)
  */
 
 goog.provide('goog.dom.pattern.Tag');
@@ -50,7 +48,7 @@ goog.dom.pattern.Tag = function(tag, type, opt_attrs, opt_styles, opt_test) {
    *
    * @private {string|RegExp}
    */
-  this.tag_ = goog.isString(tag) ? tag.toUpperCase() : tag;
+  this.tag_ = (typeof tag === 'string') ? tag.toUpperCase() : tag;
 
   /**
    * The type of token to match.

@@ -18,7 +18,6 @@
  * iframe to contain the editable area, never inherits the style of the
  * surrounding page, and is always a fixed height.
  *
- * @author nicksantos@google.com (Nick Santos)
  * @see ../demos/editor/editor.html
  * @see ../demos/editor/field_basic.html
  */
@@ -152,6 +151,7 @@ goog.editor.Field = function(id, opt_doc) {
   this.delayedChangeTimer_ = new goog.async.Delay(
       this.dispatchDelayedChange_, goog.editor.Field.DELAYED_CHANGE_FREQUENCY,
       this);
+  this.registerDisposable(this.delayedChangeTimer_);
 
   /** @private */
   this.debouncedEvents_ = {};
@@ -163,6 +163,7 @@ goog.editor.Field = function(id, opt_doc) {
     /** @private */
     this.changeTimerGecko_ = new goog.async.Delay(
         this.handleChange, goog.editor.Field.CHANGE_FREQUENCY, this);
+    this.registerDisposable(this.changeTimerGecko_);
   }
 
   /**
@@ -595,7 +596,7 @@ goog.editor.Field.prototype.resetOriginalElemProperties = function() {
     goog.dom.setProperties(field, {'style': cssText});
   }
 
-  if (goog.isString(this.originalFieldLineHeight_)) {
+  if (typeof (this.originalFieldLineHeight_) === 'string') {
     goog.style.setStyle(field, 'lineHeight', this.originalFieldLineHeight_);
     this.originalFieldLineHeight_ = null;
   }
@@ -911,6 +912,7 @@ goog.editor.Field.prototype.setupChangeListeners_ = function() {
   this.selectionChangeTimer_ = new goog.async.Delay(
       this.handleSelectionChangeTimer_,
       goog.editor.Field.SELECTION_CHANGE_FREQUENCY_, this);
+  this.registerDisposable(this.selectionChangeTimer_);
 
   if (this.followLinkInNewWindow_) {
     this.addListener(
@@ -1480,7 +1482,7 @@ goog.editor.Field.prototype.execCommand = function(command, var_args) {
  */
 goog.editor.Field.prototype.queryCommandValue = function(commands) {
   var isEditable = this.isLoaded() && this.isSelectionEditable();
-  if (goog.isString(commands)) {
+  if (typeof commands === 'string') {
     return this.queryCommandValueInternal_(commands, isEditable);
   } else {
     var state = {};
@@ -2546,7 +2548,7 @@ goog.editor.Field.prototype.makeUneditable = function(opt_skipRestore) {
   // If html is provided, copy it back and reset the properties on the field
   // so that the original node will have the same properties as it did before
   // it was made editable.
-  if (goog.isString(html)) {
+  if (typeof html === 'string') {
     goog.editor.node.replaceInnerHtml(field, html);
     this.resetOriginalElemProperties();
   }
@@ -2591,7 +2593,7 @@ goog.editor.Field.prototype.restoreDom = function() {
  * @protected
  */
 goog.editor.Field.prototype.shouldLoadAsynchronously = function() {
-  if (!goog.isDef(this.isHttps_)) {
+  if (this.isHttps_ === undefined) {
     this.isHttps_ = false;
 
     if (goog.userAgent.IE && this.usesIframe()) {

@@ -18,7 +18,6 @@
  * via XMLHttpRequest.  Instead of mirroring the XHR interface and exposing
  * events, results are used as a way to pass a "promise" of the response to
  * interested parties.
- *
  */
 
 goog.provide('goog.labs.net.xhr');
@@ -305,7 +304,7 @@ xhr.send = function(method, url, data, opt_options) {
     if (options.headers) {
       for (var key in options.headers) {
         var value = options.headers[key];
-        if (goog.isDefAndNotNull(value)) {
+        if (value != null) {
           request.setRequestHeader(key, value);
         }
       }

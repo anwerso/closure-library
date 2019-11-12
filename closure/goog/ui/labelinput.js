@@ -28,7 +28,6 @@
  * event only once (when created or when it is changed) so if you move the DOM
  * node to another form it will not be cleared correctly before submitting.
  *
- * @author arv@google.com (Erik Arvidsson)
  * @see ../demos/labelinput.html
  */
 
@@ -110,7 +109,7 @@ goog.ui.LabelInput.supportsPlaceholder_;
  * @private
  */
 goog.ui.LabelInput.isPlaceholderSupported_ = function() {
-  if (!goog.isDefAndNotNull(goog.ui.LabelInput.supportsPlaceholder_)) {
+  if (goog.ui.LabelInput.supportsPlaceholder_ == null) {
     goog.ui.LabelInput.supportsPlaceholder_ =
         ('placeholder' in goog.dom.createElement(goog.dom.TagName.INPUT));
   }

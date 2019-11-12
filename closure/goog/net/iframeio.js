@@ -129,11 +129,11 @@
  *   function() { alert('request complete'); });
  * io.sendFromForm(...);
  * </pre>
- *
  */
 
 goog.provide('goog.net.IframeIo');
 goog.provide('goog.net.IframeIo.IncrementalDataEvent');
+goog.provide('goog.net.IframeIo.TEST_ONLY');
 
 goog.require('goog.Timer');
 goog.require('goog.Uri');
@@ -1164,7 +1164,7 @@ goog.net.IframeIo.prototype.handleError_ = function(
     this.complete_ = true;
     this.lastErrorCode_ = errorCode;
     if (errorCode == goog.net.ErrorCode.CUSTOM_ERROR) {
-      goog.asserts.assert(goog.isDef(opt_customError));
+      goog.asserts.assert(opt_customError !== undefined);
       this.lastCustomError_ = opt_customError;
     }
     this.dispatchEvent(goog.net.EventType.COMPLETE);
@@ -1431,3 +1431,13 @@ goog.net.IframeIo.IncrementalDataEvent = function(data) {
   this.data = data;
 };
 goog.inherits(goog.net.IframeIo.IncrementalDataEvent, goog.events.Event);
+
+
+
+/**
+ * Test-only exports.
+ * @const
+ */
+goog.net.IframeIo.TEST_ONLY = {
+  getForm: goog.net.IframeIo.getForm_,
+};

@@ -20,7 +20,6 @@
  * XMLHTTP, Trident ActiveX (ie only), and Image request. It provides timeout
  * detection. This class is part of the BrowserChannel implementation and is not
  * for use by normal application code.
- *
  */
 
 
@@ -336,7 +335,7 @@ goog.net.ChannelRequest.Type_ = {
   /**
    * Requests that use the MSHTML ActiveX control.
    */
-  TRIDENT: 3
+  TRIDENT: 3,
 };
 
 
@@ -383,7 +382,7 @@ goog.net.ChannelRequest.Error = {
   /**
    * IE is blocking ActiveX streaming.
    */
-  ACTIVE_X_BLOCKED: 7
+  ACTIVE_X_BLOCKED: 7,
 };
 
 

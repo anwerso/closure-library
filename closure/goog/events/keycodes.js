@@ -15,7 +15,6 @@
 /**
  * @fileoverview Constant declarations for common key codes.
  *
- * @author eae@google.com (Emil A Eklund)
  * @see ../demos/keyhandler.html
  */
 
@@ -75,6 +74,10 @@ goog.events.KeyCodes = {
   // Firefox (Gecko) fires this for # on UK keyboards, rather than
   // Shift+SINGLE_QUOTE.
   FF_HASH: 163,
+  // Firefox (Gecko) fires this for ' (:) on JP keyboards, rather than
+  // SINGLE_QUOTE (US keyboard layout) or SEMICOLON (JP keyboard layout in
+  // chrome)
+  FF_JP_QUOTE: 58,
   QUESTION_MARK: 63,  // needs localization
   AT_SIGN: 64,
   A: 65,
@@ -285,7 +288,7 @@ goog.events.KeyCodes.firesKeyPressEvent = function(
   // Gecko doesn't need to use the held key for modifiers, it just checks the
   // ctrl/meta/alt/shiftKey fields.
   if (!goog.userAgent.GECKO) {
-    if (goog.isNumber(opt_heldKeyCode)) {
+    if (typeof opt_heldKeyCode === 'number') {
       opt_heldKeyCode = goog.events.KeyCodes.normalizeKeyCode(opt_heldKeyCode);
     }
     var heldKeyIsModifier = opt_heldKeyCode == goog.events.KeyCodes.CTRL ||
@@ -405,6 +408,7 @@ goog.events.KeyCodes.isCharacterKey = function(keyCode) {
     case goog.events.KeyCodes.BACKSLASH:
     case goog.events.KeyCodes.CLOSE_SQUARE_BRACKET:
     case goog.events.KeyCodes.FF_HASH:
+    case goog.events.KeyCodes.FF_JP_QUOTE:
       return true;
     case goog.events.KeyCodes.FF_DASH:
       return goog.userAgent.GECKO;

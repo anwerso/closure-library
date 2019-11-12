@@ -15,7 +15,6 @@
 /**
  * @fileoverview Definition of the ErrorReporter class, which creates an error
  * handler that reports any errors raised to a URL.
- *
  */
 
 goog.provide('goog.debug.ErrorReporter');
@@ -389,7 +388,7 @@ goog.debug.ErrorReporter.prototype.sendErrorReport = function(
     var queryData = goog.uri.utils.buildQueryDataFromMap(queryMap);
 
     // Truncate if truncationLimit set.
-    if (goog.isNumber(this.truncationLimit_)) {
+    if (typeof this.truncationLimit_ === 'number') {
       queryData = queryData.substring(0, this.truncationLimit_);
     }
 
@@ -420,7 +419,7 @@ goog.debug.ErrorReporter.prototype.setContextPrefix = function(prefix) {
  */
 goog.debug.ErrorReporter.prototype.setTruncationLimit = function(limit) {
   goog.asserts.assert(
-      !goog.isNumber(limit) || limit >= 0,
+      typeof limit !== 'number' || limit >= 0,
       'Body limit must be valid number >= 0 or null');
   this.truncationLimit_ = limit;
 };

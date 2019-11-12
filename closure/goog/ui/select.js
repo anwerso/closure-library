@@ -17,7 +17,6 @@
  * with semantics similar to the native HTML <code>&lt;select&gt;</code>
  * element.
  *
- * @author attila@google.com (Attila Bodis)
  * @see ../demos/select.html
  */
 
@@ -332,7 +331,7 @@ goog.ui.Select.prototype.setSelectedIndex = function(index) {
  * @override
  */
 goog.ui.Select.prototype.setValue = function(value) {
-  if (goog.isDefAndNotNull(value) && this.selectionModel_) {
+  if (value != null && this.selectionModel_) {
     for (var i = 0, item; item = this.selectionModel_.getItemAt(i); i++) {
       if (item && typeof item.getValue == 'function' &&
           item.getValue() == value) {

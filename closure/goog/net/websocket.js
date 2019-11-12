@@ -32,7 +32,6 @@
  *  } catch (e) {
  *    ...
  *  }
- *
  */
 
 goog.provide('goog.net.WebSocket');
@@ -209,7 +208,7 @@ goog.net.WebSocket.EventType = {
   /**
    * Fired when the WebSocket connection has been established.
    */
-  OPENED: goog.events.getUniqueId('opened')
+  OPENED: goog.events.getUniqueId('opened'),
 };
 
 
@@ -227,7 +226,7 @@ goog.net.WebSocket.ReadyState_ = {
   // Note that this is a valid state even if the OPEN state was never achieved.
   CLOSING: 2,
   // This is when the socket is actually closed.
-  CLOSED: 3
+  CLOSED: 3,
 };
 
 /**
@@ -480,7 +479,7 @@ goog.net.WebSocket.prototype.onError_ = function(event) {
  * @private
  */
 goog.net.WebSocket.prototype.clearReconnectTimer_ = function() {
-  if (goog.isDefAndNotNull(this.reconnectTimer_)) {
+  if (this.reconnectTimer_ != null) {
     goog.Timer.clear(this.reconnectTimer_);
   }
   this.reconnectTimer_ = null;

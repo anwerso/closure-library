@@ -24,7 +24,6 @@
  * This implementation currently uses upcoming Chrome and Firefox prefixes,
  * plus the original Blob.slice specification, as implemented on Chrome 10
  * and Firefox 4.0.
- *
  */
 
 goog.provide('goog.crypt.BlobHasher');
@@ -251,7 +250,7 @@ goog.crypt.BlobHasher.prototype.onLoad_ = function() {
 
   var array = null;
   if (this.fileReader_.result instanceof Array ||
-      goog.isString(this.fileReader_.result)) {
+      typeof this.fileReader_.result === 'string') {
     array = this.fileReader_.result;
   } else if (
       goog.global['ArrayBuffer'] && goog.global['Uint8Array'] &&

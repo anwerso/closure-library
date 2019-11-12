@@ -138,7 +138,7 @@ goog.proto2.TextFormatSerializer.prototype.serializeMessage_ = function(
  */
 goog.proto2.TextFormatSerializer.prototype.serializeUnknown_ = function(
     tag, value, printer) {
-  if (!goog.isDefAndNotNull(value)) {
+  if (value == null) {
     return;
   }
 
@@ -175,12 +175,12 @@ goog.proto2.TextFormatSerializer.prototype.serializeUnknown_ = function(
     return;
   }
 
-  if (goog.isString(value)) {
+  if (typeof value === 'string') {
     value = goog.string.quote(value);
   }
   printer.append(tag);
   printer.append(': ');
-  printer.append(value.toString());
+  printer.append(value);
   printer.appendLine();
 };
 
@@ -365,7 +365,7 @@ goog.proto2.TextFormatSerializer.Printer_.prototype.append = function(value) {
     this.requiresIndentation_ = false;
   }
 
-  this.buffer_.push(value.toString());
+  this.buffer_.push(String(value));
 };
 
 
@@ -661,7 +661,7 @@ goog.proto2.TextFormatSerializer.Parser.prototype.consumeMessage_ = function(
 goog.proto2.TextFormatSerializer.Parser.prototype.consumeFieldValue_ = function(
     message, field) {
   var value = this.getFieldValue_(field);
-  if (goog.isNull(value)) {
+  if (value === null) {
     return false;
   }
 
@@ -734,7 +734,7 @@ goog.proto2.TextFormatSerializer.Parser.prototype.getFieldValue_ = function(
             goog.proto2.TextFormatSerializer.Parser.parseNumericalConstant_(
                 identifier);
         // Use isDefAndNotNull since !!NaN is false.
-        if (goog.isDefAndNotNull(numericalIdentifier)) {
+        if (numericalIdentifier != null) {
           return numericalIdentifier;
         }
       }

@@ -14,8 +14,6 @@
 
 /**
  * @fileoverview A utility class for managing editable links.
- *
- * @author nicksantos@google.com (Nick Santos)
  */
 
 goog.provide('goog.editor.Link');
@@ -341,7 +339,8 @@ goog.editor.Link.isLikelyUrl = function(str) {
   // Require domains to contain a '.', unless the domain is fully qualified and
   // forbids domains from containing invalid characters.
   var domain = parts[goog.uri.utils.ComponentIndex.DOMAIN];
-  if (!domain || (addedScheme && domain.indexOf('.') == -1) ||
+  if (!domain ||
+      (addedScheme && (domain.indexOf('.') === -1 || domain.length < 3)) ||
       (/[^\w\d\-\u0100-\uffff.%]/.test(domain))) {
     return false;
   }

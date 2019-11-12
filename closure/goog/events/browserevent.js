@@ -41,8 +41,6 @@
  * NOTE: The keyCode member contains the raw browser keyCode. For normalized
  * key and character code use {@link goog.events.KeyHandler}.
  * </pre>
- *
- * @author arv@google.com (Erik Arvidsson)
  */
 
 goog.provide('goog.events.BrowserEvent');
@@ -473,7 +471,7 @@ goog.events.BrowserEvent.prototype.getBrowserEvent = function() {
  * @private
  */
 goog.events.BrowserEvent.getPointerType_ = function(e) {
-  if (goog.isString(e.pointerType)) {
+  if (typeof (e.pointerType) === 'string') {
     return e.pointerType;
   }
   // IE10 uses integer codes for pointer type.

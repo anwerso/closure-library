@@ -20,7 +20,6 @@
  *
  * This file does not compile correctly with --collapse_properties. Use
  * --property_renaming=ALL_UNQUOTED instead.
- *
  */
 
 goog.setTestOnly('goog.testing.TestCase');
@@ -1777,7 +1776,7 @@ goog.testing.TestCase.prototype.logError = function(name, error) {
   var stack = null;
   if (error) {
     this.log(error);
-    if (goog.isString(error)) {
+    if (typeof error === 'string') {
       errMsg = error;
     } else {
       errMsg = error.message || error.description || error.toString();

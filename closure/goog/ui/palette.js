@@ -16,7 +16,6 @@
  * @fileoverview A palette control.  A palette is a grid that the user can
  * highlight or select via the keyboard or the mouse.
  *
- * @author attila@google.com (Attila Bodis)
  * @see ../demos/palette.html
  */
 
@@ -403,7 +402,7 @@ goog.ui.Palette.prototype.setSize = function(size, opt_rows) {
     throw new Error(goog.ui.Component.Error.ALREADY_RENDERED);
   }
 
-  this.size_ = goog.isNumber(size) ?
+  this.size_ = (typeof size === 'number') ?
       new goog.math.Size(size, /** @type {number} */ (opt_rows)) :
       size;
 
@@ -591,7 +590,8 @@ goog.ui.Palette.prototype.adjustSize_ = function() {
       // There is already a size set; honor the number of columns (if >0), but
       // increase the number of rows if needed.
       var minRows = Math.ceil(items.length / this.size_.width);
-      if (!goog.isNumber(this.size_.height) || this.size_.height < minRows) {
+      if (typeof this.size_.height !== 'number' ||
+          this.size_.height < minRows) {
         this.size_.height = minRows;
       }
     } else {

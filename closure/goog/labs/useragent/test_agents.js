@@ -16,15 +16,12 @@
  * @fileoverview Various User-Agent strings.
  * See http://go/useragentexamples and http://www.useragentstring.com/ for
  * examples.
- *
- * @author martone@google.com (Andy Martone)
  */
 
-goog.provide('goog.labs.userAgent.testAgents');
-goog.setTestOnly('goog.labs.userAgent.testAgents');
+goog.module('goog.labs.userAgent.testAgents');
+goog.setTestOnly();
 
-goog.scope(function() {
-const testAgents = goog.labs.userAgent.testAgents;
+const testAgents = {};
 
 
 /** @const {string} */
@@ -249,6 +246,14 @@ testAgents.SAFARI_WINDOWS =
     'Mozilla/5.0 (Windows; U; Windows NT 6.1; tr-TR) AppleWebKit/533.20.25' +
     ' (KHTML, like Gecko) Version/5.0.4 Safari/533.20.27';
 
+/**
+ * The user-agent for desktop Safari and iPadOS Safari are identical and require
+ * runtime examination.
+ * @const {string}
+ */
+testAgents.SAFARI_13 =
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) AppleWebKit/605.1.15' +
+    ' (KHTML, like Gecko) Version/13.0 Safari/605.1.15';
 
 /** @const {string} */
 testAgents.COAST =
@@ -417,4 +422,5 @@ testAgents.GO2PHONE =
     'Mozilla/5.0 (Linux; Android 8.1.0; GAFP sp9820e_1h10_go_native)' +
     ' AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3605.0 Mobile' +
     ' Safari/537.36';
-});  // goog.scope
+
+exports = testAgents;

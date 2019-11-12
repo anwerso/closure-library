@@ -17,7 +17,6 @@
  * UserData uses proprietary Element.addBehavior(), Element.load(),
  * Element.save(), and Element.XMLDocument() methods, see:
  * http://msdn.microsoft.com/en-us/library/ms531424(v=vs.85).aspx.
- *
  */
 
 
@@ -192,7 +191,7 @@ goog.storage.mechanism.IEUserData.prototype.get = function(key) {
   // http://msdn.microsoft.com/en-us/library/ms531348(v=vs.85).aspx
   var value = this.storageNode_.getAttribute(
       goog.storage.mechanism.IEUserData.encodeKey_(key));
-  if (!goog.isString(value) && !goog.isNull(value)) {
+  if (typeof value !== 'string' && value !== null) {
     throw goog.storage.mechanism.ErrorCode.INVALID_VALUE;
   }
   return value;
@@ -228,7 +227,7 @@ goog.storage.mechanism.IEUserData.prototype.__iterator__ = function(opt_keys) {
     }
     var value = item.nodeValue;
     // The value must exist and be a string, otherwise it is a storage error.
-    if (!goog.isString(value)) {
+    if (typeof value !== 'string') {
       throw goog.storage.mechanism.ErrorCode.INVALID_VALUE;
     }
     return value;

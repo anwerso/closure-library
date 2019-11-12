@@ -15,8 +15,6 @@
 /**
  * @fileoverview Provides facilities for creating and querying tweaks.
  * @see http://code.google.com/p/closure-library/wiki/UsingTweaks
- *
- * @author agrieve@google.com (Andrew Grieve)
  */
 
 goog.provide('goog.tweak');
@@ -115,14 +113,14 @@ goog.tweak.applyConfigParams_ = function(entry, configParams) {
     }
     delete configParams.validValues;
   }
-  if (goog.isDef(configParams.paramName)) {
+  if (configParams.paramName !== undefined) {
     goog.asserts.assertInstanceof(
         entry, goog.tweak.BaseSetting, 'Cannot set paramName on tweak: %s',
         entry.getId());
     entry.setParamName(configParams.paramName);
     delete configParams.paramName;
   }
-  if (goog.isDef(configParams.restartRequired)) {
+  if (configParams.restartRequired !== undefined) {
     entry.setRestartRequired(configParams.restartRequired);
     delete configParams.restartRequired;
   }

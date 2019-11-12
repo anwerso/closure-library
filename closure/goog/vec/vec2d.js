@@ -31,7 +31,6 @@
  *
  * See the README for notes about the design and structure of the API
  * (especially related to performance).
- *
  */
 
 goog.provide('goog.vec.vec2d');
@@ -417,7 +416,7 @@ goog.vec.vec2d.lerp = function(vec0, vec1, f, resultVec) {
  *     chained together.
  */
 goog.vec.vec2d.max = function(vec0, limit, resultVec) {
-  if (goog.isNumber(limit)) {
+  if (typeof limit === 'number') {
     resultVec[0] = Math.max(vec0[0], limit);
     resultVec[1] = Math.max(vec0[1], limit);
   } else {
@@ -440,7 +439,7 @@ goog.vec.vec2d.max = function(vec0, limit, resultVec) {
  *     chained together.
  */
 goog.vec.vec2d.min = function(vec0, limit, resultVec) {
-  if (goog.isNumber(limit)) {
+  if (typeof limit === 'number') {
     resultVec[0] = Math.min(vec0[0], limit);
     resultVec[1] = Math.min(vec0[1], limit);
   } else {

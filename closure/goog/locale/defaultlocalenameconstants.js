@@ -15,8 +15,7 @@
 /**
  * @fileoverview Default list of locale specific country and language names.
  *
- * File generated from CLDR ver. 35
- *
+ * File generated from CLDR ver. 36
  */
 
 // clang-format off
@@ -647,7 +646,7 @@ goog.locale.defaultLocaleNameConstants = {
     'mt': 'Maltese',
     'mua': 'Mundang',
     'mul': 'Multiple languages',
-    'mus': 'Creek',
+    'mus': 'Muscogee',
     'mwl': 'Mirandese',
     'mwr': 'Marwari',
     'my': 'Burmese',

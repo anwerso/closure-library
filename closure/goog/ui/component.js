@@ -16,7 +16,6 @@
  * @fileoverview Abstract class for all UI components. This defines the standard
  * design pattern that all UI components should follow.
  *
- * @author attila@google.com (Attila Bodis)
  * @see ../demos/samplecomponent.html
  * @see http://code.google.com/p/closure-library/wiki/IntroToComponents
  */
@@ -1246,7 +1245,7 @@ goog.ui.Component.prototype.removeChild = function(child, opt_unrender) {
   if (child) {
     // Normalize child to be the object and id to be the ID string.  This also
     // ensures that the child is really ours.
-    var id = goog.isString(child) ? child : child.getId();
+    var id = (typeof child === 'string') ? child : child.getId();
     child = this.getChild(id);
 
     if (id && child) {

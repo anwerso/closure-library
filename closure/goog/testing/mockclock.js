@@ -18,7 +18,6 @@
  *
  * Derived from jsUnitMockTimeout.js, contributed to JsUnit by
  * Pivotal Computer Systems, www.pivotalsf.com
- *
  */
 
 goog.setTestOnly('goog.testing.MockClock');
@@ -85,6 +84,12 @@ goog.testing.MockClock = function(opt_autoInstall) {
    * @private {Object<number, boolean>}
    */
   this.deletedKeys_ = {};
+
+  /**
+   * Whether we should skip mocking Date.now().
+   * @private {boolean}
+   */
+  this.unmockDateNow_ = false;
 
   if (opt_autoInstall) {
     this.install();
@@ -195,6 +200,9 @@ goog.testing.MockClock.prototype.install = function() {
     r.set(goog.global, 'setImmediate', goog.bind(this.setImmediate_, this));
     r.set(goog.global, 'clearTimeout', goog.bind(this.clearTimeout_, this));
     r.set(goog.global, 'clearInterval', goog.bind(this.clearInterval_, this));
+    if (!this.unmockDateNow_) {
+      r.set(Date, 'now', goog.bind(this.getCurrentTime, this));
+    }
     // goog.Promise uses goog.async.run. In order to be able to test
     // Promise-based code, we need to make sure that goog.async.run uses
     // nextTick instead of native browser Promises. This means that it will
@@ -210,6 +218,23 @@ goog.testing.MockClock.prototype.install = function() {
     // PropertyReplacer#set can't be called with renameable functions.
     this.oldGoogNow_ = goog.now;
     goog.now = goog.bind(this.getCurrentTime, this);
+  }
+};
+
+
+/**
+ * Unmocks the Date.now() function for tests that aren't expecting it to be
+ * mocked. See b/141619890.
+ * @deprecated
+ */
+goog.testing.MockClock.prototype.unmockDateNow = function() {
+  this.unmockDateNow_ = true;
+  if (this.replacer_) {
+    try {
+      this.replacer_.restore(Date, 'now');
+    } catch (e) {
+      // Ignore error thrown if Date.now was not already mocked.
+    }
   }
 };
 

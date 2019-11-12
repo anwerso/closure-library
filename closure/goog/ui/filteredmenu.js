@@ -16,7 +16,6 @@
  * @fileoverview Menu where items can be filtered based on user keyboard input.
  * If a filter is specified only the items matching it will be displayed.
  *
- * @author eae@google.com (Emil A Eklund)
  * @see ../demos/filteredmenu.html
  */
 
@@ -320,7 +319,7 @@ goog.ui.FilteredMenu.prototype.setFilter = function(str) {
  * @return {string} Current filter or an an empty string.
  */
 goog.ui.FilteredMenu.prototype.getFilter = function() {
-  return this.filterInput_ && goog.isString(this.filterInput_.value) ?
+  return this.filterInput_ && typeof this.filterInput_.value === 'string' ?
       this.filterInput_.value :
       '';
 };

@@ -18,7 +18,6 @@
  * handling and child management, based on a generalized version of
  * {@link goog.ui.Menu}.
  *
- * @author attila@google.com (Attila Bodis)
  * @see ../demos/container.html
  */
 // TODO(attila):  Fix code/logic duplication between this and goog.ui.Control.
@@ -994,7 +993,7 @@ goog.ui.Container.prototype.updateHighlightedIndex_ = function(
  * @override
  */
 goog.ui.Container.prototype.removeChild = function(control, opt_unrender) {
-  control = goog.isString(control) ? this.getChild(control) : control;
+  control = (typeof control === 'string') ? this.getChild(control) : control;
   goog.asserts.assertInstanceof(control, goog.ui.Control);
 
   if (control) {
