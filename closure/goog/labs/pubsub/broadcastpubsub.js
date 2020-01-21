@@ -137,7 +137,8 @@ goog.labs.pubsub.BroadcastPubSub.prototype.handleStorageEvent_ = function(e) {
   // IE return empty string instead of null after removing value from localStorage.
   var data = JSON.parse(browserEvent.newValue || null);
   var args = goog.isObject(data) && data['args'];
-  if (goog.isArray(args) && goog.array.every(args, goog.isString)) {
+  if (goog.isArray(args) &&
+      goog.array.every(args, x => typeof x === 'string')) {
     this.dispatch_(args);
   } else {
     goog.log.warning(this.logger_, 'storage event contained invalid arguments');
@@ -408,7 +409,7 @@ goog.labs.pubsub.BroadcastPubSub.IS_IE8_ =
  */
 goog.labs.pubsub.BroadcastPubSub.validateIe8Event_ = function(obj) {
   if (goog.isObject(obj) && typeof obj['timestamp'] === 'number' &&
-      goog.array.every(obj['args'], goog.isString)) {
+      goog.array.every(obj['args'], x => typeof x === 'string')) {
     return {'timestamp': obj['timestamp'], 'args': obj['args']};
   }
   return null;
@@ -426,7 +427,7 @@ goog.labs.pubsub.BroadcastPubSub.filterValidIe8Events_ = function(events) {
   return goog.array.filter(
       goog.array.map(
           events, goog.labs.pubsub.BroadcastPubSub.validateIe8Event_),
-      goog.isDefAndNotNull);
+      x => x != null);
 };
 
 

@@ -17,8 +17,6 @@
  *
  * Based on the Dojo code which in turn is based on the MochiKit code.
  *
- * @author arv@google.com (Erik Arvidsson)
- * @author brenneman@google.com (Shawn Brenneman)
  */
 
 goog.provide('goog.async.Deferred');
@@ -348,6 +346,7 @@ goog.async.Deferred.prototype.errback = function(opt_result) {
  * current stack trace to give additional context.
  * @param {*} error
  * @private
+ * @suppress {missingProperties} error.stack
  */
 goog.async.Deferred.prototype.makeStackTraceLong_ = function(error) {
   if (!goog.async.Deferred.LONG_STACK_TRACES) {
